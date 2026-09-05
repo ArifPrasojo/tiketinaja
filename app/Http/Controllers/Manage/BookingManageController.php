@@ -25,7 +25,23 @@ class BookingManageController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            if ($request->status === 'playing') {
+                // Sedang bermain: confirmed + checked_in + sekarang di dalam rentang jam main
+                $now   = now();
+                $time  = $now->format('H:i:s');
+                $today = $now->toDateString();
+
+                $query->where('status', BookingStatus::Confirmed)
+                    ->where('checked_in', true)
+                    ->whereHas('items', fn($q) => $q
+                        ->whereDate('booking_date', $today)
+                        ->whereTime('start_time', '<=', $time))
+                    ->whereHas('items', fn($q) => $q
+                        ->whereDate('booking_date', $today)
+                        ->whereTime('end_time', '>', $time));
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
         if ($request->filled('search')) {
@@ -46,10 +62,32 @@ class BookingManageController extends Controller
             'total'     => (clone $baseQuery)->count(),
             'pending'   => (clone $baseQuery)->where('status', BookingStatus::Pending)->count(),
             'confirmed' => (clone $baseQuery)->where('status', BookingStatus::Confirmed)->count(),
+            'playing'   => $this->countPlaying($baseQuery),
+            'completed' => (clone $baseQuery)->where('status', BookingStatus::Completed)->count(),
+            'cancelled' => (clone $baseQuery)->where('status', BookingStatus::Cancelled)->count(),
+            'expired'   => (clone $baseQuery)->where('status', BookingStatus::Expired)->count(),
             'today'     => (clone $baseQuery)->whereHas('items', fn($q) => $q->whereDate('booking_date', today()))->count(),
         ];
 
         return view('manage.bookings.index', compact('bookings', 'stats'));
+    }
+
+    private function countPlaying($query): int
+    {
+        $now   = now();
+        $time  = $now->format('H:i:s');
+        $today = $now->toDateString();
+
+        return (clone $query)
+            ->where('status', BookingStatus::Confirmed)
+            ->where('checked_in', true)
+            ->whereHas('items', fn($q) => $q
+                ->whereDate('booking_date', $today)
+                ->whereTime('start_time', '<=', $time))
+            ->whereHas('items', fn($q) => $q
+                ->whereDate('booking_date', $today)
+                ->whereTime('end_time', '>', $time))
+            ->count();
     }
 
     public function show(Booking $booking)

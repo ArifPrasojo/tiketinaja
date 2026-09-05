@@ -38,10 +38,27 @@ class BookingService
         $open  = Carbon::parse($operatingHour->open_time);
         $close = Carbon::parse($operatingHour->close_time);
         $now   = now();
+        
+        // Aturan anker: menit harus :00, minimal mulai jam 07:00
+        $anchor = $open->copy();
+        if ($anchor->minute > 0) {
+            $anchor->addHour()->startOfHour(); // Snap up jika ada menit lebih
+        }
+        
+        // Batas minimal jam 07:00
+        if ($anchor->hour < 7) {
+            $anchor->hour(7)->startOfHour();
+        }
 
-        for ($time = $open->copy(); $time < $close; $time->addHour()) {
+        for ($time = $anchor->copy(); $time < $close; $time->addHour()) {
+            // Pastikan end time (1 jam setelah start time) tidak melewati batas tutup
+            $endTimeCalc = $time->copy()->addHour();
+            if ($endTimeCalc > $close) {
+                break;
+            }
+
             $startTime = $time->format('H:i');
-            $endTime   = $time->copy()->addHour()->format('H:i');
+            $endTime   = $endTimeCalc->format('H:i');
             $taken     = in_array($startTime, $reserved);
 
             $slots[] = [

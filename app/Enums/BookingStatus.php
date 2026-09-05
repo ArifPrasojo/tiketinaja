@@ -42,11 +42,11 @@ enum BookingStatus: string
     public function badgeClass(): string
     {
         return match ($this) {
-            self::Pending   => 'bg-yellow-100 text-yellow-800',
-            self::Confirmed => 'bg-blue-100 text-blue-800',
-            self::Cancelled => 'bg-red-100 text-red-800',
-            self::Expired   => 'bg-gray-100 text-gray-600',
-            self::Completed => 'bg-green-100 text-green-800',
+            self::Pending   => 'bg-amber-50 text-amber-700 border border-amber-200',
+            self::Confirmed => 'bg-blue-50 text-electric-blue border border-blue-200',
+            self::Cancelled => 'bg-red-50 text-red-700 border border-red-200',
+            self::Expired   => 'bg-slate-100 text-slate-600 border border-slate-200',
+            self::Completed => 'bg-green-50 text-field-green border border-green-200',
         };
     }
 
@@ -54,7 +54,7 @@ enum BookingStatus: string
     public function badgeClassFor(\App\Models\Booking $booking): string
     {
         if ($this === self::Confirmed && $booking->checked_in && $this->isOngoing($booking)) {
-            return 'bg-indigo-100 text-indigo-800';
+            return 'bg-green-50 text-field-green border border-green-200';
         }
         return $this->badgeClass();
     }
@@ -63,11 +63,11 @@ enum BookingStatus: string
     public function barClass(): string
     {
         return match ($this) {
-            self::Pending   => 'bg-yellow-400',
-            self::Confirmed => 'bg-blue-400',
-            self::Cancelled => 'bg-red-300',
-            self::Expired   => 'bg-gray-300',
-            self::Completed => 'bg-green-400',
+            self::Pending   => 'bg-amber-400',
+            self::Confirmed => 'bg-sky-400',
+            self::Cancelled => 'bg-red-400',
+            self::Expired   => 'bg-slate-500',
+            self::Completed => 'bg-emerald-400',
         };
     }
 

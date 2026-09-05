@@ -11,8 +11,18 @@ export default {
 
     theme: {
         extend: {
+            colors: {
+                'pitch-black': '#0F172A',
+                'electric-blue': '#0052FF',
+                'athletic-orange': '#FF5C00',
+                'field-green': '#22C55E',
+                'stadium-gray': '#E2E8F0',
+                'surface-light': '#faf9fa',
+                'on-surface-variant': '#434653',
+            },
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                display: ['Noto Serif', 'serif'],
             },
         },
     },
