@@ -19,54 +19,80 @@
 <body class="bg-surface-light text-pitch-black antialiased">
 
 <div class="min-h-screen flex flex-col">
-    <header class="w-full top-0 sticky bg-white shadow-sm shadow-electric-blue/10 z-50" x-data="{ mobileOpen: false }">
-        <div class="flex justify-between items-center w-full px-6 max-w-7xl mx-auto h-20">
+    @php
+        $userRoleBadge = auth()->user()->isAdmin() ? 'Admin Central' : (auth()->user()->isManager() ? 'Venue Manager' : 'Member');
+        $navActive = 'inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-blue-50 text-electric-blue border border-blue-200/60 shadow-sm transition-all';
+        $navInactive = 'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:text-pitch-black hover:bg-slate-50 transition-all';
+    @endphp
+
+    <header class="w-full top-0 sticky bg-white/95 backdrop-blur-md border-b border-stadium-gray/80 z-50 shadow-sm shadow-slate-100" x-data="{ mobileOpen: false }">
+        <div class="flex justify-between items-center w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto h-20">
             <div class="flex items-center gap-8">
-                <x-logo-wordmark :href="route('dashboard')" :size="36" class="transition-all duration-200 active:scale-95"/>
-                <nav class="hidden md:flex items-center gap-1">
+                <x-logo-wordmark :href="route('dashboard')" :size="38" :badge="$userRoleBadge" class="transition-all duration-200 active:scale-95"/>
+                
+                <nav class="hidden md:flex items-center gap-1.5">
                     <a href="{{ route('dashboard') }}"
-                       class="font-semibold text-sm px-3 py-1.5 rounded-lg transition
-                              {{ request()->routeIs('dashboard') ? 'text-electric-blue border-b-2 border-electric-blue' : 'text-on-surface-variant hover:text-electric-blue hover:bg-slate-50' }}">
+                       class="{{ request()->routeIs('dashboard') ? $navActive : $navInactive }}">
+                        @if(request()->routeIs('dashboard'))
+                            <span class="w-2 h-2 rounded-full bg-electric-blue"></span>
+                        @endif
                         Dashboard
                     </a>
+                    
                     @if(auth()->user()->isCustomer())
                         <a href="{{ route('venues.index') }}"
-                           class="font-semibold text-sm px-3 py-1.5 rounded-lg transition
-                                  {{ request()->routeIs('venues.*','courts.*') ? 'text-electric-blue border-b-2 border-electric-blue' : 'text-on-surface-variant hover:text-electric-blue hover:bg-slate-50' }}">
+                           class="{{ request()->routeIs('venues.*','courts.*') ? $navActive : $navInactive }}">
+                            @if(request()->routeIs('venues.*','courts.*'))
+                                <span class="w-2 h-2 rounded-full bg-electric-blue"></span>
+                            @endif
                             Venue
                         </a>
                         <a href="{{ route('bookings.index') }}"
-                           class="font-semibold text-sm px-3 py-1.5 rounded-lg transition
-                                  {{ request()->routeIs('bookings.*') ? 'text-electric-blue border-b-2 border-electric-blue' : 'text-on-surface-variant hover:text-electric-blue hover:bg-slate-50' }}">
+                           class="{{ request()->routeIs('bookings.*') ? $navActive : $navInactive }}">
+                            @if(request()->routeIs('bookings.*'))
+                                <span class="w-2 h-2 rounded-full bg-electric-blue"></span>
+                            @endif
                             Booking Saya
                         </a>
                     @endif
+
                     @if(auth()->user()->isManager() || auth()->user()->isAdmin())
                         <a href="{{ route('manage.venues.index') }}"
-                           class="font-semibold text-sm px-3 py-1.5 rounded-lg transition
-                                  {{ request()->routeIs('manage.venues.*') ? 'text-electric-blue border-b-2 border-electric-blue' : 'text-on-surface-variant hover:text-electric-blue hover:bg-slate-50' }}">
+                           class="{{ request()->routeIs('manage.venues.*') ? $navActive : $navInactive }}">
+                            @if(request()->routeIs('manage.venues.*'))
+                                <span class="w-2 h-2 rounded-full bg-electric-blue"></span>
+                            @endif
                             Venue
                         </a>
                         <a href="{{ route('manage.bookings.index') }}"
-                           class="font-semibold text-sm px-3 py-1.5 rounded-lg transition
-                                  {{ request()->routeIs('manage.bookings.*') ? 'text-electric-blue border-b-2 border-electric-blue' : 'text-on-surface-variant hover:text-electric-blue hover:bg-slate-50' }}">
+                           class="{{ request()->routeIs('manage.bookings.*') ? $navActive : $navInactive }}">
+                            @if(request()->routeIs('manage.bookings.*'))
+                                <span class="w-2 h-2 rounded-full bg-electric-blue"></span>
+                            @endif
                             Transaksi
                         </a>
                         <a href="{{ route('manage.promos.index') }}"
-                           class="font-semibold text-sm px-3 py-1.5 rounded-lg transition
-                                  {{ request()->routeIs('manage.promos.*') ? 'text-electric-blue border-b-2 border-electric-blue' : 'text-on-surface-variant hover:text-electric-blue hover:bg-slate-50' }}">
+                           class="{{ request()->routeIs('manage.promos.*') ? $navActive : $navInactive }}">
+                            @if(request()->routeIs('manage.promos.*'))
+                                <span class="w-2 h-2 rounded-full bg-electric-blue"></span>
+                            @endif
                             Promo
                         </a>
                         <a href="{{ route('manage.checkin.index') }}"
-                           class="font-semibold text-sm px-3 py-1.5 rounded-lg transition
-                                  {{ request()->routeIs('manage.checkin.*') ? 'text-electric-blue border-b-2 border-electric-blue' : 'text-on-surface-variant hover:text-electric-blue hover:bg-slate-50' }}">
+                           class="{{ request()->routeIs('manage.checkin.*') ? $navActive : $navInactive }}">
+                            @if(request()->routeIs('manage.checkin.*'))
+                                <span class="w-2 h-2 rounded-full bg-electric-blue"></span>
+                            @endif
                             Check-in
                         </a>
                     @endif
+
                     @if(auth()->user()->isAdmin())
                         <a href="{{ route('admin.users.index') }}"
-                           class="font-semibold text-sm px-3 py-1.5 rounded-lg transition
-                                  {{ request()->routeIs('admin.users.*') ? 'text-electric-blue border-b-2 border-electric-blue' : 'text-on-surface-variant hover:text-electric-blue hover:bg-slate-50' }}">
+                           class="{{ request()->routeIs('admin.users.*') ? $navActive : $navInactive }}">
+                            @if(request()->routeIs('admin.users.*'))
+                                <span class="w-2 h-2 rounded-full bg-electric-blue"></span>
+                            @endif
                             Users
                         </a>
                     @endif
@@ -74,74 +100,130 @@
             </div>
 
             <div class="flex items-center gap-3">
+                {{-- Notification bell --}}
                 @php $unread = auth()->user()->unreadNotifications()->count(); @endphp
                 <a href="{{ route('notifications.index') }}"
-                   class="relative p-2 rounded-lg text-on-surface-variant hover:bg-slate-50 hover:text-electric-blue transition">
-                    <span class="material-symbols-outlined text-[20px]">notifications</span>
+                   title="Notifikasi"
+                   class="relative w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-slate-100 hover:text-electric-blue transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">notifications</span>
                     @if($unread > 0)
-                        <span class="absolute top-1 right-1 w-4 h-4 bg-athletic-orange text-white text-xs rounded-full flex items-center justify-center font-bold leading-none">
+                        <span class="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold leading-none ring-2 ring-white">
                             {{ $unread > 9 ? '9+' : $unread }}
                         </span>
                     @endif
                 </a>
 
+                {{-- User Profile Pill Dropdown --}}
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" @click.outside="open = false"
-                            class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-lg border-2 border-stadium-gray bg-white hover:border-electric-blue transition">
-                        <div class="w-7 h-7 rounded-lg bg-electric-blue text-white flex items-center justify-center font-bold text-xs">
+                            class="flex items-center gap-2.5 p-1 pl-1.5 pr-3 rounded-full hover:bg-slate-50 transition-all border border-stadium-gray bg-white shadow-sm hover:border-electric-blue">
+                        <div class="w-8 h-8 rounded-full bg-electric-blue text-white flex items-center justify-center font-bold text-xs shadow-sm">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
-                        <span class="hidden sm:block text-sm font-medium text-pitch-black max-w-[120px] truncate">
-                            {{ auth()->user()->name }}
-                        </span>
-                        <span class="material-symbols-outlined text-[16px] text-on-surface-variant">expand_more</span>
+                        <div class="hidden sm:block text-left leading-tight">
+                            <p class="text-xs font-bold text-pitch-black truncate max-w-[120px]">{{ auth()->user()->name }}</p>
+                            <p class="text-[10px] font-semibold text-electric-blue truncate">
+                                {{ auth()->user()->isAdmin() ? 'Super Admin' : (auth()->user()->isManager() ? 'Venue Manager' : 'Member') }}
+                            </p>
+                        </div>
+                        <span class="material-symbols-outlined text-[18px] text-on-surface-variant transition-transform" :class="open ? 'rotate-180' : ''">keyboard_arrow_down</span>
                     </button>
 
-                    <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-100"
-                         x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                         class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-stadium-gray py-1.5 z-50">
-                        <div class="px-4 py-2.5 border-b border-stadium-gray">
+                    <div x-show="open" x-cloak
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+                         class="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-stadium-gray p-1.5 z-50">
+                        <div class="px-3.5 py-3 border-b border-stadium-gray/70">
                             <p class="text-sm font-bold text-pitch-black truncate">{{ auth()->user()->name }}</p>
                             <p class="text-xs text-on-surface-variant truncate">{{ auth()->user()->email }}</p>
-                            <span class="inline-block mt-1.5 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md
-                                {{ auth()->user()->isAdmin() ? 'bg-purple-100 text-purple-700' : (auth()->user()->isManager() ? 'bg-blue-100 text-electric-blue' : 'bg-green-100 text-field-green') }}">
-                                {{ ucfirst(auth()->user()->role) }}
-                            </span>
+                            <div class="mt-2">
+                                <span class="inline-block px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md
+                                    {{ auth()->user()->isAdmin() ? 'bg-purple-100 text-purple-700' : (auth()->user()->isManager() ? 'bg-blue-100 text-electric-blue' : 'bg-green-100 text-field-green') }}">
+                                    {{ auth()->user()->isAdmin() ? 'Super Admin' : (auth()->user()->isManager() ? 'Venue Manager' : 'Customer') }}
+                                </span>
+                            </div>
                         </div>
-                        <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-4 py-2 text-sm text-pitch-black hover:bg-slate-50 transition">
-                            Profil Saya
-                        </a>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">
-                                Keluar
-                            </button>
-                        </form>
+                        <div class="py-1">
+                            <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-pitch-black hover:bg-slate-50 rounded-xl transition">
+                                <span class="material-symbols-outlined text-[18px] text-on-surface-variant">person</span>
+                                Profil Saya
+                            </a>
+                            <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-pitch-black hover:bg-slate-50 rounded-xl transition">
+                                <span class="material-symbols-outlined text-[18px] text-on-surface-variant">dashboard</span>
+                                Dashboard
+                            </a>
+                        </div>
+                        <div class="pt-1 border-t border-stadium-gray/70">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="flex items-center gap-2.5 w-full px-3.5 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl transition">
+                                    <span class="material-symbols-outlined text-[18px] text-red-500">logout</span>
+                                    Keluar
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
+                {{-- Hamburger Menu for Mobile --}}
                 <button @click="mobileOpen = !mobileOpen"
-                        class="md:hidden p-2 rounded-lg text-on-surface-variant hover:bg-slate-50">
+                        class="md:hidden w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-slate-100 hover:text-pitch-black transition">
                     <span class="material-symbols-outlined text-[24px]" x-show="!mobileOpen">menu</span>
                     <span class="material-symbols-outlined text-[24px]" x-show="mobileOpen" x-cloak>close</span>
                 </button>
             </div>
         </div>
 
-        <div x-show="mobileOpen" x-cloak class="md:hidden border-t border-stadium-gray bg-white px-4 py-3 space-y-1">
-            <a href="{{ route('dashboard') }}" class="block px-3 py-2 rounded-lg text-sm {{ request()->routeIs('dashboard') ? 'text-electric-blue font-bold' : 'text-on-surface-variant' }}">Dashboard</a>
+        {{-- Mobile Drawer Navigation --}}
+        <div x-show="mobileOpen" x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="md:hidden border-t border-stadium-gray bg-white px-4 py-3 space-y-1.5 shadow-lg">
+            <a href="{{ route('dashboard') }}"
+               class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('dashboard') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
+                <span>Dashboard</span>
+                @if(request()->routeIs('dashboard'))
+                    <span class="w-2 h-2 rounded-full bg-electric-blue"></span>
+                @endif
+            </a>
             @if(auth()->user()->isCustomer())
-                <a href="{{ route('venues.index') }}" class="block px-3 py-2 rounded-lg text-sm text-on-surface-variant">Venue</a>
-                <a href="{{ route('bookings.index') }}" class="block px-3 py-2 rounded-lg text-sm text-on-surface-variant">Booking Saya</a>
+                <a href="{{ route('venues.index') }}"
+                   class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('venues.*','courts.*') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
+                    <span>Cari Venue</span>
+                </a>
+                <a href="{{ route('bookings.index') }}"
+                   class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('bookings.*') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
+                    <span>Booking Saya</span>
+                </a>
             @endif
-            @if(!auth()->user()->isCustomer())
-                <a href="{{ route('manage.venues.index') }}" class="block px-3 py-2 rounded-lg text-sm text-on-surface-variant">Venue</a>
-                <a href="{{ route('manage.bookings.index') }}" class="block px-3 py-2 rounded-lg text-sm text-on-surface-variant">Transaksi</a>
-                <a href="{{ route('manage.promos.index') }}" class="block px-3 py-2 rounded-lg text-sm text-on-surface-variant">Promo</a>
-                <a href="{{ route('manage.checkin.index') }}" class="block px-3 py-2 rounded-lg text-sm text-on-surface-variant">Check-in</a>
+            @if(auth()->user()->isManager() || auth()->user()->isAdmin())
+                <a href="{{ route('manage.venues.index') }}"
+                   class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('manage.venues.*') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
+                    <span>Venue</span>
+                </a>
+                <a href="{{ route('manage.bookings.index') }}"
+                   class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('manage.bookings.*') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
+                    <span>Transaksi</span>
+                </a>
+                <a href="{{ route('manage.promos.index') }}"
+                   class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('manage.promos.*') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
+                    <span>Promo</span>
+                </a>
+                <a href="{{ route('manage.checkin.index') }}"
+                   class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('manage.checkin.*') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
+                    <span>Check-in</span>
+                </a>
             @endif
             @if(auth()->user()->isAdmin())
-                <a href="{{ route('admin.users.index') }}" class="block px-3 py-2 rounded-lg text-sm text-on-surface-variant">Users</a>
+                <a href="{{ route('admin.users.index') }}"
+                   class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('admin.users.*') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
+                    <span>Users</span>
+                </a>
             @endif
         </div>
     </header>

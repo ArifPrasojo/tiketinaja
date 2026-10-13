@@ -46,7 +46,7 @@
             @endif
 
             @if($isOngoing)
-                <div class="relative overflow-hidden bg-electric-blue rounded-2xl px-5 py-4 text-white shadow-lg"
+                <div class="relative overflow-hidden bg-gradient-to-r from-teal-600 to-emerald-600 rounded-3xl p-6 text-white shadow-xl shadow-teal-500/15"
                      x-data="{
                         endTime: new Date('{{ $endDateTime->toISOString() }}'),
                         display: '',
@@ -62,32 +62,35 @@
                         }
                      }"
                      x-init="tick(); setInterval(() => tick(), 1000)">
-                    <div class="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-electric-blue/10"></div>
-                    <div class="absolute -right-2 bottom-2 w-16 h-16 rounded-full bg-electric-blue/5"></div>
+                    <div class="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/10 pointer-events-none"></div>
+                    <div class="absolute -right-2 bottom-2 w-16 h-16 rounded-full bg-white/5 pointer-events-none"></div>
 
-                    <div class="relative flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-electric-blue/20 rounded-xl flex items-center justify-center">
+                    <div class="relative z-10 flex items-center justify-between">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
                                 <span class="material-symbols-outlined text-[28px] text-white">sprint</span>
                             </div>
                             <div>
-                                <p class="font-bold text-sm">Sedang Bermain</p>
-                                <p class="text-on-surface-variant text-xs">{{ $firstItem?->court?->name }} · {{ $booking->venue?->name }}</p>
+                                <span class="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-teal-200">
+                                    <span class="w-2 h-2 rounded-full bg-white animate-ping"></span> Sesi Berlangsung
+                                </span>
+                                <h3 class="font-extrabold text-lg text-white">Sedang Bermain</h3>
+                                <p class="text-teal-100 text-xs mt-0.5">{{ $firstItem?->court?->name }} · {{ $booking->venue?->name }}</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="text-xs text-on-surface-variant mb-0.5">Sisa waktu</p>
-                            <p class="font-mono font-bold text-2xl" x-text="display">--:--</p>
+                            <p class="text-[11px] font-semibold text-teal-200 mb-0.5 uppercase tracking-wider">Sisa Waktu</p>
+                            <p class="font-mono font-black text-3xl text-white tracking-tight" x-text="display">--:--</p>
                         </div>
                     </div>
 
-                    <div class="relative mt-3 h-1.5 bg-electric-blue/20 rounded-full overflow-hidden">
-                        <div class="absolute inset-y-0 left-0 bg-white/70 rounded-full transition-all"
+                    <div class="relative z-10 mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
+                        <div class="absolute inset-y-0 left-0 bg-white rounded-full transition-all"
                              :style="`width: ${pct}%`"></div>
                     </div>
-                    <div class="flex justify-between mt-1 text-xs text-on-surface-variant">
-                        <span>{{ $firstItem?->start_time }}</span>
-                        <span>{{ $lastItem?->end_time }}</span>
+                    <div class="relative z-10 flex justify-between mt-1.5 text-xs text-teal-100 font-semibold">
+                        <span>Mulai: {{ $firstItem?->start_time }}</span>
+                        <span>Selesai: {{ $lastItem?->end_time }}</span>
                     </div>
                 </div>
             @endif

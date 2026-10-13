@@ -56,13 +56,23 @@ class BookingController extends Controller
 
     public function index(Request $request)
     {
-        $bookings = $request->user()
-            ->bookings()
-            ->with(['venue', 'payment', 'items.court'])
-            ->latest()
-            ->paginate(10);
+        $user = $request->user();
+        $query = $user->bookings()->with(['venue', 'payment', 'items.court']);
 
-        return view('bookings.index', compact('bookings'));
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $bookings = $query->latest()->paginate(10)->withQueryString();
+
+        $stats = [
+            'total'     => $user->bookings()->count(),
+            'pending'   => $user->bookings()->where('status', \App\Enums\BookingStatus::Pending)->count(),
+            'confirmed' => $user->bookings()->where('status', \App\Enums\BookingStatus::Confirmed)->count(),
+            'completed' => $user->bookings()->where('status', \App\Enums\BookingStatus::Completed)->count(),
+        ];
+
+        return view('bookings.index', compact('bookings', 'stats'));
     }
 
     public function pay(Booking $booking, BookingService $bookingService)

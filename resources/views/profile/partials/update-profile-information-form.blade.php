@@ -33,16 +33,16 @@
         @error('email')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
 
         @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-            <div class="mt-2 p-3 bg-amber-500/15 border border-amber-500/20 rounded-lg">
-                <p class="text-sm text-amber-400">
+            <div class="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                <p class="text-xs text-amber-800">
                     Email Anda belum diverifikasi.
                     <button form="send-verification"
-                            class="underline font-medium hover:text-amber-300">
+                            class="underline font-bold hover:text-amber-900 ml-1">
                         Kirim ulang email verifikasi.
                     </button>
                 </p>
                 @if (session('status') === 'verification-link-sent')
-                    <p class="mt-1 text-sm text-electric-blue font-medium">Link verifikasi sudah dikirim!</p>
+                    <p class="mt-1 text-xs text-field-green font-bold">Link verifikasi sudah dikirim ke email Anda!</p>
                 @endif
             </div>
         @endif
@@ -50,14 +50,14 @@
 
     <div class="flex items-center gap-4 pt-2">
         <button type="submit"
-                class="px-5 py-2.5 text-sm font-medium text-white bg-electric-blue rounded-xl hover:bg-blue-700 transition">
+                class="px-6 py-2.5 text-xs font-bold text-white bg-electric-blue rounded-xl hover:bg-blue-700 active:scale-95 transition shadow-sm">
             Simpan Perubahan
         </button>
         @if (session('status') === 'profile-updated')
             <p x-data="{ show: true }" x-show="show" x-transition
                x-init="setTimeout(() => show = false, 2500)"
-               class="text-sm text-electric-blue font-medium">
-                <span class="material-symbols-outlined text-[16px] inline-block align-text-bottom">check_circle</span> Tersimpan!
+               class="text-xs text-field-green font-bold flex items-center gap-1">
+                <span class="material-symbols-outlined text-[16px]">check_circle</span> Tersimpan!
             </p>
         @endif
     </div>

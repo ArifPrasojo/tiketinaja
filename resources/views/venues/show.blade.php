@@ -36,11 +36,11 @@
                     {{-- Rating badge --}}
                     @php $avgRating = $venue->reviews()->avg('rating'); $reviewCount = $venue->reviews()->count(); @endphp
                     @if($reviewCount > 0)
-                        <div class="flex items-center gap-2 bg-amber-500/10 border border-amber-500/25 rounded-lg px-4 py-2 self-start">
-                            <span class="text-amber-400 text-xl">★</span>
+                        <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 self-start shadow-sm">
+                            <span class="text-amber-500 text-xl font-bold">★</span>
                             <div>
-                                <p class="text-lg font-bold text-pitch-black">{{ number_format($avgRating, 1) }}</p>
-                                <p class="text-xs text-on-surface-variant">{{ $reviewCount }} ulasan</p>
+                                <p class="text-base font-bold text-pitch-black">{{ number_format($avgRating, 1) }}</p>
+                                <p class="text-[11px] text-on-surface-variant font-medium">{{ $reviewCount }} ulasan</p>
                             </div>
                         </div>
                     @endif
