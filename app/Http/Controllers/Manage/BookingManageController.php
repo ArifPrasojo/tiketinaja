@@ -51,6 +51,14 @@ class BookingManageController extends Controller
             });
         }
 
+        if ($request->filled('date_from')) {
+            $query->whereHas('items', fn($q) => $q->whereDate('booking_date', '>=', $request->date_from));
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereHas('items', fn($q) => $q->whereDate('booking_date', '<=', $request->date_to));
+        }
+
         $bookings = $query->latest()->paginate(15)->withQueryString();
 
         // Stats for header

@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-display text-2xl font-bold text-pitch-black italic">Dashboard</h2>
+        <div>
+            <h2 class="text-2xl font-bold text-pitch-black">Hello, {{ auth()->user()->name }}!</h2>
+            <p class="text-sm text-on-surface-variant mt-0.5">Berikut ringkasan platform TiketinAja hari ini.</p>
+        </div>
     </x-slot>
 
     <div class="py-6">
@@ -8,93 +11,143 @@
 
         @if(auth()->user()->role === 'admin')
 
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
                 @foreach([
-                    ['label'=>'Total Pengguna',  'value'=>number_format($totalUsers),  'color'=>'bg-electric-blue'],
-                    ['label'=>'Total Venue',     'value'=>number_format($totalVenues), 'color'=>'bg-field-green'],
-                    ['label'=>'Total Booking',   'value'=>number_format($totalBookings),'color'=>'bg-athletic-orange'],
-                    ['label'=>'Total Pendapatan','value'=>'Rp '.number_format($totalRevenue,0,',','.'),'color'=>'bg-purple-500'],
+                    ['label'=>'Total Pengguna',  'value'=>number_format($totalUsers),  'icon'=>'group',         'iconBg'=>'bg-blue-100',   'iconColor'=>'text-electric-blue'],
+                    ['label'=>'Total Venue',     'value'=>number_format($totalVenues), 'icon'=>'stadium',       'iconBg'=>'bg-green-100',  'iconColor'=>'text-field-green'],
+                    ['label'=>'Total Booking',   'value'=>number_format($totalBookings),'icon'=>'receipt_long', 'iconBg'=>'bg-orange-100', 'iconColor'=>'text-athletic-orange'],
+                    ['label'=>'Total Pendapatan','value'=>'Rp '.number_format($totalRevenue,0,',','.'),'icon'=>'payments','iconBg'=>'bg-purple-100','iconColor'=>'text-purple-600'],
                 ] as $stat)
-                    <div class="bg-white border border-stadium-gray rounded-xl sporty-shadow p-5 flex items-center gap-4">
-                        <div class="w-2 h-10 rounded-full {{ $stat['color'] }}"></div>
-                        <div>
-                            <p class="text-xs text-on-surface-variant font-medium">{{ $stat['label'] }}</p>
-                            <p class="text-xl font-bold text-pitch-black">{{ $stat['value'] }}</p>
+                    <div class="bg-white border border-stadium-gray rounded-2xl p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+                        <div class="w-12 h-12 rounded-xl {{ $stat['iconBg'] }} flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[24px] {{ $stat['iconColor'] }}">{{ $stat['icon'] }}</span>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-xs text-on-surface-variant font-medium uppercase tracking-wide">{{ $stat['label'] }}</p>
+                            <p class="text-xl font-bold text-pitch-black truncate mt-0.5">{{ $stat['value'] }}</p>
                         </div>
                     </div>
                 @endforeach
             </div>
 
             @if(isset($bookingsByStatus))
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-                @php
-                    $statusCfg = [
-                        'pending'   => ['label'=>'Menunggu', 'cls'=>'bg-amber-50 text-amber-700'],
-                        'confirmed' => ['label'=>'Terkonfirmasi','cls'=>'bg-blue-50 text-electric-blue'],
-                        'completed' => ['label'=>'Selesai',  'cls'=>'bg-green-50 text-field-green'],
-                        'cancelled' => ['label'=>'Dibatalkan','cls'=>'bg-red-50 text-red-700'],
-                        'expired'   => ['label'=>'Kedaluwarsa','cls'=>'bg-slate-100 text-slate-600'],
-                    ];
-                @endphp
-                @foreach($statusCfg as $key => $cfg)
-                    <div class="bg-white border border-stadium-gray rounded-xl sporty-shadow p-3 text-center">
-                        <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold {{ $cfg['cls'] }}">{{ $cfg['label'] }}</span>
-                        <p class="text-2xl font-bold text-pitch-black mt-1">{{ $bookingsByStatus[$key] ?? 0 }}</p>
-                    </div>
-                @endforeach
+            <div class="mb-8">
+                <h3 class="text-sm font-bold text-pitch-black uppercase tracking-wide mb-3">
+                    <span class="material-symbols-outlined text-[16px] align-text-bottom text-electric-blue mr-1">monitoring</span>
+                    Status Booking
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    @php
+                        $statusCfg = [
+                            'pending'   => ['label'=>'Menunggu',       'icon'=>'hourglass_top',  'iconBg'=>'bg-amber-100',  'iconColor'=>'text-amber-600',  'badge'=>'bg-amber-50 text-amber-700 border border-amber-200'],
+                            'confirmed' => ['label'=>'Terkonfirmasi', 'icon'=>'check_circle',   'iconBg'=>'bg-blue-100',   'iconColor'=>'text-electric-blue','badge'=>'bg-blue-50 text-electric-blue border border-blue-200'],
+                            'completed' => ['label'=>'Selesai',       'icon'=>'emoji_events',   'iconBg'=>'bg-green-100',  'iconColor'=>'text-field-green', 'badge'=>'bg-green-50 text-field-green border border-green-200'],
+                            'cancelled' => ['label'=>'Dibatalkan',    'icon'=>'cancel',         'iconBg'=>'bg-red-100',    'iconColor'=>'text-red-600',     'badge'=>'bg-red-50 text-red-700 border border-red-200'],
+                            'expired'   => ['label'=>'Kedaluwarsa',   'icon'=>'alarm_off',      'iconBg'=>'bg-slate-100',  'iconColor'=>'text-slate-500',   'badge'=>'bg-slate-50 text-slate-600 border border-slate-200'],
+                        ];
+                    @endphp
+                    @foreach($statusCfg as $key => $cfg)
+                        <div class="bg-white border border-stadium-gray rounded-2xl p-4 text-center hover:shadow-md transition-shadow">
+                            <div class="w-10 h-10 rounded-xl {{ $cfg['iconBg'] }} flex items-center justify-center mx-auto mb-2">
+                                <span class="material-symbols-outlined text-[20px] {{ $cfg['iconColor'] }}">{{ $cfg['icon'] }}</span>
+                            </div>
+                            <p class="text-2xl font-bold text-pitch-black">{{ $bookingsByStatus[$key] ?? 0 }}</p>
+                            <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider {{ $cfg['badge'] }}">{{ $cfg['label'] }}</span>
+                        </div>
+                    @endforeach
+                </div>
             </div>
             @endif
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 @if(isset($topVenues))
-                <div class="bg-white border border-stadium-gray rounded-xl sporty-shadow p-6">
-                    <h3 class="text-sm font-bold text-pitch-black mb-4">Top Venue by Revenue</h3>
-                    <div class="space-y-3">
-                        @foreach($topVenues as $v)
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-pitch-black font-medium">{{ $v->name }}</span>
-                            <span class="text-athletic-orange font-bold">Rp {{ number_format($v->revenue ?? 0, 0, ',', '.') }}</span>
+                <div class="bg-white border border-stadium-gray rounded-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-stadium-gray flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-pitch-black flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px] text-athletic-orange">leaderboard</span>
+                            Top Venue by Revenue
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            @foreach($topVenues as $i => $v)
+                            <div class="flex items-center gap-3">
+                                <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0
+                                    {{ $i === 0 ? 'bg-amber-100 text-amber-700' : ($i === 1 ? 'bg-slate-200 text-slate-600' : 'bg-orange-100 text-orange-600') }}">
+                                    {{ $i + 1 }}
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-pitch-black truncate">{{ $v->name }}</p>
+                                </div>
+                                <span class="text-sm font-bold text-athletic-orange shrink-0">Rp {{ number_format($v->revenue ?? 0, 0, ',', '.') }}</span>
+                            </div>
+                            @endforeach
                         </div>
-                        @endforeach
                     </div>
                 </div>
                 @endif
 
-                <div class="bg-white border border-stadium-gray rounded-xl sporty-shadow p-6">
-                    <h3 class="text-sm font-bold text-pitch-black mb-4">Aktivitas Terbaru</h3>
-                    @if(isset($recentActivities) && $recentActivities->count())
-                        <div class="space-y-2 text-sm max-h-64 overflow-y-auto">
-                            @foreach($recentActivities as $log)
-                                <div class="flex items-start gap-2 text-on-surface-variant">
-                                    <span class="text-slate-400 text-xs whitespace-nowrap mt-0.5">{{ $log->created_at->format('d/m H:i') }}</span>
-                                    <span>
-                                        <span class="font-medium text-pitch-black">{{ $log->user?->name ?? 'System' }}</span>
-                                        · {{ str_replace('_', ' ', $log->action) }}
-                                        @if(isset($log->properties['booking_code']))
-                                            <span class="font-mono text-xs text-electric-blue">{{ $log->properties['booking_code'] }}</span>
-                                        @endif
-                                    </span>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <p class="text-slate-400 text-sm">Belum ada aktivitas.</p>
-                    @endif
+                <div class="bg-white border border-stadium-gray rounded-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-stadium-gray flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-pitch-black flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px] text-electric-blue">history</span>
+                            Aktivitas Terbaru
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        @if(isset($recentActivities) && $recentActivities->count())
+                            <div class="space-y-3 max-h-72 overflow-y-auto">
+                                @foreach($recentActivities as $log)
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                                            <span class="material-symbols-outlined text-[16px] text-on-surface-variant">event_note</span>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm text-pitch-black">
+                                                <span class="font-semibold">{{ $log->user?->name ?? 'System' }}</span>
+                                                <span class="text-on-surface-variant"> · {{ str_replace('_', ' ', $log->action) }}</span>
+                                            </p>
+                                            <div class="flex items-center gap-2 mt-0.5">
+                                                @if(isset($log->properties['booking_code']))
+                                                    <span class="font-mono text-xs text-electric-blue font-bold">{{ $log->properties['booking_code'] }}</span>
+                                                @endif
+                                                <span class="text-xs text-slate-400">{{ $log->created_at->diffForHumans() }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-8">
+                                <span class="material-symbols-outlined text-[40px] text-slate-300">inbox</span>
+                                <p class="text-sm text-slate-400 mt-2">Belum ada aktivitas.</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                @foreach([
-                    ['label'=>'Kelola Users','href'=>route('admin.users.index'),'icon'=>'group'],
-                    ['label'=>'Kelola Venue','href'=>route('manage.venues.index'),'icon'=>'stadium'],
-                    ['label'=>'Semua Booking','href'=>route('manage.bookings.index'),'icon'=>'receipt_long'],
-                    ['label'=>'Promo','href'=>route('manage.promos.index'),'icon'=>'local_activity'],
-                ] as $link)
-                    <a href="{{ $link['href'] }}" class="bg-white border border-stadium-gray rounded-xl sporty-shadow p-4 text-center hover:border-electric-blue hover:-translate-y-0.5 transition text-sm font-bold text-pitch-black group">
-                        <div class="text-3xl mb-1 text-electric-blue group-hover:scale-110 transition-transform"><span class="material-symbols-outlined text-[32px]">{{ $link['icon'] }}</span></div>
-                        {{ $link['label'] }}
-                    </a>
-                @endforeach
+            <div>
+                <h3 class="text-sm font-bold text-pitch-black uppercase tracking-wide mb-3">
+                    <span class="material-symbols-outlined text-[16px] align-text-bottom text-electric-blue mr-1">bolt</span>
+                    Aksi Cepat
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    @foreach([
+                        ['label'=>'Kelola Users',   'desc'=>'Manajemen akun pengguna',  'href'=>route('admin.users.index'),     'icon'=>'group',          'iconBg'=>'bg-blue-100',   'iconColor'=>'text-electric-blue'],
+                        ['label'=>'Kelola Venue',   'desc'=>'Atur venue & lapangan',    'href'=>route('manage.venues.index'),   'icon'=>'stadium',        'iconBg'=>'bg-green-100',  'iconColor'=>'text-field-green'],
+                        ['label'=>'Semua Booking',  'desc'=>'Lihat semua transaksi',    'href'=>route('manage.bookings.index'), 'icon'=>'receipt_long',    'iconBg'=>'bg-orange-100', 'iconColor'=>'text-athletic-orange'],
+                        ['label'=>'Promo',          'desc'=>'Kelola kode diskon',       'href'=>route('manage.promos.index'),   'icon'=>'local_activity',  'iconBg'=>'bg-purple-100', 'iconColor'=>'text-purple-600'],
+                    ] as $link)
+                        <a href="{{ $link['href'] }}" class="bg-white border border-stadium-gray rounded-2xl p-5 hover:border-electric-blue hover:shadow-md hover:-translate-y-0.5 transition-all group">
+                            <div class="w-11 h-11 rounded-xl {{ $link['iconBg'] }} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined text-[22px] {{ $link['iconColor'] }}">{{ $link['icon'] }}</span>
+                            </div>
+                            <p class="text-sm font-bold text-pitch-black">{{ $link['label'] }}</p>
+                            <p class="text-xs text-on-surface-variant mt-0.5">{{ $link['desc'] }}</p>
+                        </a>
+                    @endforeach
+                </div>
             </div>
 
         @elseif(auth()->user()->role === 'manager')

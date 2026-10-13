@@ -40,13 +40,18 @@ class BookingController extends Controller
         }
     }
 
-    public function show(Booking $booking)
+    public function show(Booking $booking, \App\Services\MidtransService $midtransService)
     {
         $this->authorize('view', $booking);
 
         $booking->load(['items.court.sport', 'payment', 'venue', 'review', 'promo']);
 
-        return view('bookings.show', compact('booking'));
+        $snapToken = null;
+        if ($booking->status === \App\Enums\BookingStatus::Pending && auth()->id() === $booking->user_id) {
+            $snapToken = $midtransService->getOrCreateSnapToken($booking);
+        }
+
+        return view('bookings.show', compact('booking', 'snapToken'));
     }
 
     public function index(Request $request)

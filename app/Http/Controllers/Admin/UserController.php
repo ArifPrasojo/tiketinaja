@@ -25,7 +25,14 @@ class UserController extends Controller
 
         $users = $query->latest()->paginate(20)->withQueryString();
 
-        return view('admin.users.index', compact('users'));
+        $stats = [
+            'total'     => User::count(),
+            'admin'     => User::where('role', 'admin')->count(),
+            'manager'   => User::where('role', 'manager')->count(),
+            'customer'  => User::where('role', 'customer')->count(),
+        ];
+
+        return view('admin.users.index', compact('users', 'stats'));
     }
 
     public function update(Request $request, User $user)

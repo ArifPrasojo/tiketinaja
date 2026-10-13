@@ -199,12 +199,22 @@ class BookingService
         }
     }
 
-    public function processPayment(Booking $booking): Booking
+    public function processPayment(Booking $booking, ?string $paymentMethod = null, ?array $payload = null): Booking
     {
-        $booking->payment()->update([
+        $updateData = [
             'status'  => PaymentStatus::Paid,
             'paid_at' => now(),
-        ]);
+        ];
+
+        if ($paymentMethod) {
+            $updateData['payment_method'] = $paymentMethod;
+        }
+
+        if ($payload) {
+            $updateData['payload'] = json_encode($payload);
+        }
+
+        $booking->payment()->update($updateData);
 
         $booking->update(['status' => BookingStatus::Confirmed]);
         $booking->refresh();

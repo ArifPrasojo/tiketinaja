@@ -26,7 +26,24 @@ class PromoController extends Controller
 
         $promos = $query->latest()->paginate(15);
 
-        return view('manage.promos.index', compact('promos'));
+        // Stats for metrics
+        $baseQuery = Promo::query();
+        if ($user->isManager()) {
+            $venueIds = $user->venues()->pluck('id');
+            $baseQuery->where(function ($q) use ($venueIds) {
+                $q->whereIn('venue_id', $venueIds)->orWhereNull('venue_id');
+            });
+        }
+
+        $stats = [
+            'total'      => (clone $baseQuery)->count(),
+            'active'     => (clone $baseQuery)->where('is_active', true)->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })->count(),
+            'total_used' => (clone $baseQuery)->sum('used_count'),
+        ];
+
+        return view('manage.promos.index', compact('promos', 'stats'));
     }
 
     public function create(Request $request)

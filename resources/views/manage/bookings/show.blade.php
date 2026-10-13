@@ -195,6 +195,10 @@
                                     <span class="text-on-surface-variant">Jumlah</span>
                                     <span class="font-semibold text-pitch-black">Rp {{ number_format($booking->payment->amount, 0, ',', '.') }}</span>
                                 </div>
+                                <div class="flex justify-between">
+                                    <span class="text-on-surface-variant">Metode</span>
+                                    <span class="font-semibold text-xs text-pitch-black uppercase">{{ $booking->payment->payment_method ?: 'Midtrans / Online' }}</span>
+                                </div>
                                 @if($booking->payment->paid_at)
                                     <div class="flex justify-between">
                                         <span class="text-on-surface-variant">Dibayar</span>

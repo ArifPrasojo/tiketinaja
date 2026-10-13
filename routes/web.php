@@ -46,6 +46,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/bookings/{booking}/pay', [BookingController::class, 'pay'])->name('bookings.pay');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 
+    // Midtrans Snap
+    Route::get('/bookings/{booking}/midtrans/token', [\App\Http\Controllers\MidtransController::class, 'token'])->name('bookings.midtrans.token');
+    Route::post('/bookings/{booking}/midtrans/finish', [\App\Http\Controllers\MidtransController::class, 'finish'])->name('bookings.midtrans.finish');
+
     // Reviews
     Route::post('/bookings/{booking}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
@@ -97,5 +101,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
+
+// Midtrans Webhook / HTTP Notification (called by Midtrans server)
+Route::post('/payments/midtrans-notification', [\App\Http\Controllers\MidtransController::class, 'notification'])
+    ->name('payments.midtrans.notification');
 
 require __DIR__ . '/auth.php';

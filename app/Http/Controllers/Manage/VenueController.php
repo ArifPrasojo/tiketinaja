@@ -23,7 +23,19 @@ class VenueController extends Controller
 
         $venues = $query->latest()->paginate(10);
 
-        return view('manage.venues.index', compact('venues'));
+        // Stats
+        $baseQuery = Venue::query();
+        if ($request->user()->isManager()) {
+            $baseQuery->where('manager_id', $request->user()->id);
+        }
+
+        $stats = [
+            'total'        => (clone $baseQuery)->count(),
+            'active'       => (clone $baseQuery)->where('is_active', true)->count(),
+            'total_courts' => (clone $baseQuery)->withCount('courts')->get()->sum('courts_count'),
+        ];
+
+        return view('manage.venues.index', compact('venues', 'stats'));
     }
 
     public function create()

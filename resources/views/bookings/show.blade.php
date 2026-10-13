@@ -109,7 +109,7 @@
                     <div class="flex flex-col sm:flex-row flex-wrap gap-2 w-full sm:w-auto shrink-0">
                         @if($svValue === 'pending')
                             @if($booking->expires_at?->isFuture())
-                                <div class="flex items-center gap-1.5 text-xs text-amber-400 bg-amber-500/15 border border-amber-500/20 px-3 py-2 rounded-xl"
+                                <div class="flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl"
                                      x-data="{ expires: new Date('{{ $booking->expires_at->toISOString() }}'), d: '' }"
                                      x-init="
                                          let t = () => {
@@ -123,14 +123,24 @@
                                     Bayar dalam <span x-text="d" class="font-mono font-bold ml-0.5"></span>
                                 </div>
                             @endif
-                            <form method="POST" action="{{ route('bookings.pay', $booking) }}" class="w-full sm:w-auto">
-                                @csrf
-                                <button type="submit"
-                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-electric-blue text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition">
-                                    <span class="material-symbols-outlined text-[16px]">credit_card</span>
-                                    Bayar Sekarang
+
+                            @if(!empty($snapToken))
+                                <button type="button"
+                                        id="pay-button"
+                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-electric-blue text-white text-sm font-bold rounded-xl hover:bg-blue-700 active:scale-95 transition shadow-lg shadow-blue-500/20">
+                                    <span class="material-symbols-outlined text-[18px]">payments</span>
+                                    Bayar Sekarang (Midtrans)
                                 </button>
-                            </form>
+                            @else
+                                <form method="POST" action="{{ route('bookings.pay', $booking) }}" class="w-full sm:w-auto">
+                                    @csrf
+                                    <button type="submit"
+                                            class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-electric-blue text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition">
+                                        <span class="material-symbols-outlined text-[16px]">credit_card</span>
+                                        Bayar Sekarang (Simulasi)
+                                    </button>
+                                </form>
+                            @endif
                         @endif
 
                         @if($svValue === 'confirmed' && !$booking->checked_in)
@@ -224,18 +234,22 @@
                 @endphp
                 <div class="bg-white border border-stadium-gray rounded-xl sporty-shadow p-5">
                     <h2 class="text-xs font-semibold text-on-surface-variant uppercase tracking-wide mb-4">Pembayaran</h2>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                         <div>
                             <p class="text-xs text-on-surface-variant mb-0.5">Status</p>
                             <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-full {{ $payBadge }}">{{ $payLabel }}</span>
                         </div>
                         <div>
-                            <p class="text-xs text-on-surface-variant mb-0.5">Kode</p>
+                            <p class="text-xs text-on-surface-variant mb-0.5">Kode Transaksi</p>
                             <p class="font-mono text-xs font-semibold text-electric-blue">{{ $booking->payment->payment_code }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-on-surface-variant mb-0.5">Metode</p>
+                            <p class="font-semibold text-xs text-pitch-black uppercase">{{ $booking->payment->payment_method ?: 'Midtrans / Online' }}</p>
                         </div>
                         @if($booking->payment->paid_at)
                             <div>
-                                <p class="text-xs text-on-surface-variant mb-0.5">Dibayar</p>
+                                <p class="text-xs text-on-surface-variant mb-0.5">Waktu Lunas</p>
                                 <p class="text-on-surface-variant text-xs">{{ $booking->payment->paid_at->format('d M Y, H:i') }}</p>
                             </div>
                         @endif
@@ -322,4 +336,53 @@
 
         </div>
     </div>
+
+    @if(!empty($snapToken))
+        <script src="{{ config('midtrans.snap_url') }}" data-client-key="{{ config('midtrans.client_key') }}"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const payButton = document.getElementById('pay-button');
+                if (payButton) {
+                    payButton.addEventListener('click', function () {
+                        payButton.disabled = true;
+                        payButton.classList.add('opacity-75');
+
+                        window.snap.pay('{{ $snapToken }}', {
+                            onSuccess: function (result) {
+                                fetch('{{ route('bookings.midtrans.finish', $booking) }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify(result)
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    window.location.reload();
+                                })
+                                .catch(() => {
+                                    window.location.reload();
+                                });
+                            },
+                            onPending: function (result) {
+                                window.location.reload();
+                            },
+                            onError: function (result) {
+                                alert('Pembayaran gagal atau terjadi kesalahan. Silakan coba lagi.');
+                                payButton.disabled = false;
+                                payButton.classList.remove('opacity-75');
+                                window.location.reload();
+                            },
+                            onClose: function () {
+                                payButton.disabled = false;
+                                payButton.classList.remove('opacity-75');
+                            }
+                        });
+                    });
+                }
+            });
+        </script>
+    @endif
 </x-app-layout>
