@@ -23,10 +23,15 @@
                     'cancelled' => ['bg-red-50 text-red-700 border-red-200',         'Dibatalkan'],
                     'expired'   => ['bg-slate-100 text-slate-600 border-slate-200',      'Kedaluwarsa'],
                 ];
-                $scls = $statusCfg[$sv][0] ?? 'bg-slate-100 text-slate-600 border-slate-200';
-                $slbl = $statusCfg[$sv][1] ?? ucfirst($sv);
                 $pv   = $booking->payment?->status instanceof \App\Enums\PaymentStatus
                     ? $booking->payment->status->value : ($booking->payment?->status ?? '');
+                $isPaid = $pv === 'paid';
+                $scls = ($sv === 'expired' && $isPaid)
+                    ? 'bg-red-50 text-red-700 border-red-200'
+                    : ($statusCfg[$sv][0] ?? 'bg-slate-100 text-slate-600 border-slate-200');
+                $slbl = ($sv === 'expired' && $isPaid)
+                    ? 'Tiket Hangus (Tidak Hadir)'
+                    : ($statusCfg[$sv][1] ?? ucfirst($sv));
                 $payLabel = ['pending'=>'Belum Dibayar','paid'=>'Lunas','failed'=>'Gagal','expired'=>'Kedaluwarsa','cancelled'=>'Dibatalkan'][$pv] ?? $pv;
             @endphp
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white border border-stadium-gray rounded-xl sporty-shadow px-5 py-4">

@@ -42,6 +42,19 @@ class MidtransController extends Controller
 
     public function finish(Request $request, Booking $booking, BookingService $bookingService): JsonResponse
     {
+        // Tolak jika sudah melewati batas 15 menit
+        if ($booking->expires_at && $booking->expires_at->isPast()) {
+            if ($booking->status === \App\Enums\BookingStatus::Pending) {
+                $bookingService->expireSingleBooking($booking);
+            }
+
+            return response()->json([
+                'success'      => false,
+                'message'      => 'Waktu pembayaran 15 menit telah habis. Booking ini kedaluwarsa.',
+                'redirect_url' => route('bookings.show', $booking),
+            ], 422);
+        }
+
         $this->authorize('pay', $booking);
 
         $payload = $request->all();

@@ -40,14 +40,30 @@ class BookingController extends Controller
         }
     }
 
-    public function show(Booking $booking, \App\Services\MidtransService $midtransService)
+    public function show(Booking $booking, \App\Services\MidtransService $midtransService, BookingService $bookingService)
     {
         $this->authorize('view', $booking);
+
+        // Auto-expire booking jika waktu pembayaran 15 menit sudah lewat tapi scheduler belum jalan
+        if ($booking->status === \App\Enums\BookingStatus::Pending
+            && $booking->expires_at
+            && $booking->expires_at->isPast()
+        ) {
+            $bookingService->expireSingleBooking($booking);
+            $booking->refresh();
+        }
+
+        // Cek dan otomatis hanguskan tiket jika masa sewa sudah berakhir tanpa check-in
+        $bookingService->checkAndExpireIfSessionEnded($booking);
 
         $booking->load(['items.court.sport', 'payment', 'venue', 'review', 'promo']);
 
         $snapToken = null;
-        if ($booking->status === \App\Enums\BookingStatus::Pending && auth()->id() === $booking->user_id) {
+        if ($booking->status === \App\Enums\BookingStatus::Pending
+            && auth()->id() === $booking->user_id
+            && $booking->expires_at
+            && $booking->expires_at->isFuture()
+        ) {
             $snapToken = $midtransService->getOrCreateSnapToken($booking);
         }
 
@@ -70,6 +86,7 @@ class BookingController extends Controller
             'pending'   => $user->bookings()->where('status', \App\Enums\BookingStatus::Pending)->count(),
             'confirmed' => $user->bookings()->where('status', \App\Enums\BookingStatus::Confirmed)->count(),
             'completed' => $user->bookings()->where('status', \App\Enums\BookingStatus::Completed)->count(),
+            'expired'   => $user->bookings()->where('status', \App\Enums\BookingStatus::Expired)->count(),
         ];
 
         return view('bookings.index', compact('bookings', 'stats'));

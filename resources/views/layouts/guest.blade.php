@@ -82,13 +82,16 @@
     <div class="flex-1 flex flex-col min-h-screen bg-white">
 
         {{-- Mobile header (only visible on small screens) --}}
-        <div class="lg:hidden flex items-center justify-between px-6 py-5 border-b border-stadium-gray">
-            <x-logo-wordmark :href="route('home')" :size="32"/>
-            <a href="{{ route('home') }}" class="text-sm text-on-surface-variant hover:text-pitch-black">← Beranda</a>
+        <div class="lg:hidden flex items-center justify-between px-4 sm:px-6 py-4 border-b border-stadium-gray bg-white/95 sticky top-0 z-40 backdrop-blur-md">
+            <x-logo-wordmark :href="route('home')" :size="30"/>
+            <a href="{{ route('home') }}" class="text-xs sm:text-sm font-bold text-on-surface-variant hover:text-pitch-black flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                Beranda
+            </a>
         </div>
 
         {{-- Form area --}}
-        <div class="flex-1 flex items-center justify-center px-6 py-10 sm:px-12">
+        <div class="flex-1 flex items-center justify-center px-4 py-8 sm:px-10 sm:py-12">
             <div class="w-full max-w-[420px]">
                 {{ $slot }}
             </div>

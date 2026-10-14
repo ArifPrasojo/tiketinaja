@@ -107,6 +107,8 @@ class BookingManageController extends Controller
             abort(403);
         }
 
+        $this->bookingService->checkAndExpireIfSessionEnded($booking);
+
         $booking->load(['user', 'venue', 'payment', 'items.court.sport', 'review', 'promo']);
 
         return view('manage.bookings.show', compact('booking'));

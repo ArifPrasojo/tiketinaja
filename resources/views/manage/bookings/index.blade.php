@@ -174,8 +174,9 @@
                                 $isOngoing = $sv === 'confirmed' && $b->checked_in && $firstItem && $lastItem
                                     && $now->gte(\Carbon\Carbon::parse($firstItem->booking_date)->setTimeFromTimeString($firstItem->start_time))
                                     && $now->lt(\Carbon\Carbon::parse($lastItem->booking_date)->setTimeFromTimeString($lastItem->end_time));
-                                $badgeCls = match(true) { $isOngoing=>'bg-teal-50 text-teal-700 border-teal-200', $sv==='pending'=>'bg-amber-50 text-amber-700 border-amber-200', $sv==='confirmed'=>'bg-blue-50 text-electric-blue border-blue-200', $sv==='completed'=>'bg-blue-50 text-electric-blue border-blue-200', $sv==='cancelled'=>'bg-red-50 text-red-700 border-red-200', default=>'bg-slate-100 text-slate-600 border-slate-200' };
-                                $badgeLbl = match(true) { $isOngoing=>'Sedang Bermain', $sv==='pending'=>'Pending', $sv==='confirmed'=>'Konfirmasi', $sv==='completed'=>'Selesai Bermain', $sv==='cancelled'=>'Batal', default=>ucfirst($sv) };
+                                $isPaid = $b->payment && ($b->payment->status === \App\Enums\PaymentStatus::Paid || (is_string($b->payment->status) && $b->payment->status === 'paid'));
+                                $badgeCls = match(true) { $isOngoing=>'bg-teal-50 text-teal-700 border-teal-200', $sv==='pending'=>'bg-amber-50 text-amber-700 border-amber-200', $sv==='confirmed'=>'bg-blue-50 text-electric-blue border-blue-200', $sv==='completed'=>'bg-blue-50 text-electric-blue border-blue-200', $sv==='cancelled'=>'bg-red-50 text-red-700 border-red-200', $sv==='expired'&&$isPaid=>'bg-red-50 text-red-700 border-red-200', default=>'bg-slate-100 text-slate-600 border-slate-200' };
+                                $badgeLbl = match(true) { $isOngoing=>'Sedang Bermain', $sv==='pending'=>'Pending', $sv==='confirmed'=>'Konfirmasi', $sv==='completed'=>'Selesai Bermain', $sv==='cancelled'=>'Batal', $sv==='expired'&&$isPaid=>'Tiket Hangus', default=>ucfirst($sv) };
                             @endphp
                             <div class="p-4 space-y-3">
                                 <div class="flex items-start justify-between gap-2">
@@ -237,8 +238,9 @@
                                         $isOngoing = $sv === 'confirmed' && $b->checked_in && $firstItem && $lastItem
                                             && $now->gte(\Carbon\Carbon::parse($firstItem->booking_date)->setTimeFromTimeString($firstItem->start_time))
                                             && $now->lt(\Carbon\Carbon::parse($lastItem->booking_date)->setTimeFromTimeString($lastItem->end_time));
-                                        $badgeCls = match(true) { $isOngoing=>'bg-teal-50 text-teal-700 border-teal-200', $sv==='pending'=>'bg-amber-50 text-amber-700 border-amber-200', $sv==='confirmed'=>'bg-blue-50 text-electric-blue border-blue-200', $sv==='completed'=>'bg-blue-50 text-electric-blue border-blue-200', $sv==='cancelled'=>'bg-red-50 text-red-700 border-red-200', default=>'bg-slate-100 text-slate-600 border-slate-200' };
-                                        $badgeLbl = match(true) { $isOngoing=>'Sedang Bermain', $sv==='pending'=>'Pending', $sv==='confirmed'=>'Konfirmasi', $sv==='completed'=>'Selesai Bermain', $sv==='cancelled'=>'Batal', default=>ucfirst($sv) };
+                                        $isPaid = $b->payment && ($b->payment->status === \App\Enums\PaymentStatus::Paid || (is_string($b->payment->status) && $b->payment->status === 'paid'));
+                                        $badgeCls = match(true) { $isOngoing=>'bg-teal-50 text-teal-700 border-teal-200', $sv==='pending'=>'bg-amber-50 text-amber-700 border-amber-200', $sv==='confirmed'=>'bg-blue-50 text-electric-blue border-blue-200', $sv==='completed'=>'bg-blue-50 text-electric-blue border-blue-200', $sv==='cancelled'=>'bg-red-50 text-red-700 border-red-200', $sv==='expired'&&$isPaid=>'bg-red-50 text-red-700 border-red-200', default=>'bg-slate-100 text-slate-600 border-slate-200' };
+                                        $badgeLbl = match(true) { $isOngoing=>'Sedang Bermain', $sv==='pending'=>'Pending', $sv==='confirmed'=>'Konfirmasi', $sv==='completed'=>'Selesai Bermain', $sv==='cancelled'=>'Batal', $sv==='expired'&&$isPaid=>'Tiket Hangus', default=>ucfirst($sv) };
                                     @endphp
                                     <tr class="hover:bg-slate-50/70 transition-colors">
                                         <td class="px-6 py-4">

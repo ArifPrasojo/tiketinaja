@@ -113,10 +113,14 @@
                         @if($svValue === 'pending')
                             @if($booking->expires_at?->isFuture())
                                 <div class="flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl"
-                                     x-data="{ expires: new Date('{{ $booking->expires_at->toISOString() }}'), d: '' }"
+                                     x-data="{ expires: new Date('{{ $booking->expires_at->toISOString() }}'), d: '', expired: false }"
                                      x-init="
                                          let t = () => {
                                              let s = Math.max(0, Math.floor((expires - new Date()) / 1000));
+                                             if (s <= 0 && !expired) {
+                                                 expired = true;
+                                                 setTimeout(() => location.reload(), 1000);
+                                             }
                                              let m = Math.floor(s/60), ss = s%60;
                                              d = m+':'+String(ss).padStart(2,'0');
                                          };
@@ -125,24 +129,31 @@
                                     <span class="material-symbols-outlined text-[14px]">schedule</span>
                                     Bayar dalam <span x-text="d" class="font-mono font-bold ml-0.5"></span>
                                 </div>
+                            @else
+                                <div class="flex items-center gap-1.5 text-xs text-red-700 bg-red-50 border border-red-200 px-3 py-2 rounded-xl">
+                                    <span class="material-symbols-outlined text-[14px]">timer_off</span>
+                                    Waktu pembayaran telah habis
+                                </div>
                             @endif
 
-                            @if(!empty($snapToken))
-                                <button type="button"
-                                        id="pay-button"
-                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-electric-blue text-white text-sm font-bold rounded-xl hover:bg-blue-700 active:scale-95 transition shadow-lg shadow-blue-500/20">
-                                    <span class="material-symbols-outlined text-[18px]">payments</span>
-                                    Bayar Sekarang (Midtrans)
-                                </button>
-                            @else
-                                <form method="POST" action="{{ route('bookings.pay', $booking) }}" class="w-full sm:w-auto">
-                                    @csrf
-                                    <button type="submit"
-                                            class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-electric-blue text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition">
-                                        <span class="material-symbols-outlined text-[16px]">credit_card</span>
-                                        Bayar Sekarang (Simulasi)
+                            @if($booking->expires_at?->isFuture())
+                                @if(!empty($snapToken))
+                                    <button type="button"
+                                            id="pay-button"
+                                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-electric-blue text-white text-sm font-bold rounded-xl hover:bg-blue-700 active:scale-95 transition shadow-lg shadow-blue-500/20">
+                                        <span class="material-symbols-outlined text-[18px]">payments</span>
+                                        Bayar Sekarang (Midtrans)
                                     </button>
-                                </form>
+                                @else
+                                    <form method="POST" action="{{ route('bookings.pay', $booking) }}" class="w-full sm:w-auto">
+                                        @csrf
+                                        <button type="submit"
+                                                class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-electric-blue text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition">
+                                            <span class="material-symbols-outlined text-[16px]">credit_card</span>
+                                            Bayar Sekarang (Simulasi)
+                                        </button>
+                                    </form>
+                                @endif
                             @endif
                         @endif
 
@@ -256,6 +267,27 @@
                                 <p class="text-on-surface-variant text-xs">{{ $booking->payment->paid_at->format('d M Y, H:i') }}</p>
                             </div>
                         @endif
+                    </div>
+                </div>
+            @endif
+
+            @if($svValue === 'expired' && $booking->payment && ($booking->payment->status === \App\Enums\PaymentStatus::Paid || (is_string($booking->payment->status) && $booking->payment->status === 'paid')))
+                <div class="bg-red-50 border border-red-200 rounded-2xl p-5 shadow-sm">
+                    <div class="flex items-start gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[24px]">event_busy</span>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-700">
+                                    Tiket Hangus
+                                </span>
+                            </div>
+                            <h3 class="font-bold text-pitch-black text-base mt-1">Masa Sewa Lapangan Telah Berakhir</h3>
+                            <p class="text-xs text-on-surface-variant leading-relaxed mt-1">
+                                Tiket reservasi ini dinyatakan hangus karena Anda tidak melakukan proses check-in selama masa aktif sewa lapangan di <strong>{{ $booking->venue?->name }}</strong>. Sesuai ketentuan, tiket yang hangus tidak dapat digunakan kembali atau dijadwalkan ulang.
+                            </p>
+                        </div>
                     </div>
                 </div>
             @endif

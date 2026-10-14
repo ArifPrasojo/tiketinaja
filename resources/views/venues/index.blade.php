@@ -2,48 +2,50 @@
     <x-slot name="title">Cari Lapangan Olahraga</x-slot>
 
     {{-- Hero --}}
-    <section class="relative bg-surface-light py-20 overflow-hidden">
+    <section class="relative bg-surface-light py-10 sm:py-16 md:py-20 overflow-hidden">
         <div class="absolute inset-0">
             <div class="absolute top-10 left-10 w-64 h-64 rounded-full bg-blue-50 blur-3xl"></div>
             <div class="absolute bottom-0 right-10 w-80 h-80 rounded-full bg-teal-500/15 blur-3xl"></div>
             <div class="absolute inset-0" style="background: radial-gradient(ellipse at top, rgba(16,185,129,0.08) 0%, transparent 55%)"></div>
         </div>
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 class="text-4xl sm:text-5xl font-bold text-pitch-black mb-4 leading-tight">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-pitch-black mb-3 sm:mb-4 leading-tight tracking-tight">
                 Booking Lapangan Olahraga<br>
                 <span class="text-electric-blue">Mudah & Cepat</span>
             </h1>
-            <p class="text-on-surface-variant text-lg mb-10 max-w-xl mx-auto">
-                Temukan lapangan futsal, badminton, basket, dan olahraga lainnya di kotamu.
+            <p class="text-on-surface-variant text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-xl mx-auto">
+                Temukan lapangan futsal, badminton, basket, dan arena olahraga terbaik di kotamu.
             </p>
 
             {{-- Search bar --}}
             <form method="GET" action="{{ route('venues.index') }}"
-                  class="max-w-3xl mx-auto bg-white border border-stadium-gray rounded-xl p-4 shadow-2xl shadow-black/40">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[16px] text-on-surface-variant">search</span>
+                  class="max-w-3xl mx-auto bg-white border border-stadium-gray rounded-2xl p-3 sm:p-4 shadow-xl">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3">
+                    <div class="sm:col-span-5 relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">search</span>
                         <input type="text" name="search" value="{{ request('search') }}"
                                placeholder="Cari nama venue..."
-                               class="w-full pl-9 pr-3 py-2.5 text-sm bg-white border-2 border-stadium-gray text-pitch-black rounded-lg focus:ring-0 focus:ring-0 focus:border-electric-blue outline-none placeholder:text-on-surface-variant">
+                               class="w-full pl-9 pr-3 py-2.5 text-sm bg-surface-light border border-stadium-gray text-pitch-black rounded-xl focus:border-electric-blue focus:bg-white outline-none placeholder:text-on-surface-variant">
                     </div>
-                    <select name="city"
-                            class="w-full px-3 py-2.5 text-sm bg-white border-2 border-stadium-gray text-pitch-black rounded-lg focus:ring-0 focus:ring-0 focus:border-electric-blue outline-none">
-                        <option value="">Semua Kota</option>
-                        @foreach($cities as $city)
-                            <option value="{{ $city }}" {{ request('city') == $city ? 'selected' : '' }}>{{ $city }}</option>
-                        @endforeach
-                    </select>
-                    <div class="flex gap-2">
+                    <div class="sm:col-span-3">
+                        <select name="city"
+                                class="w-full px-3 py-2.5 text-sm bg-surface-light border border-stadium-gray text-pitch-black rounded-xl focus:border-electric-blue focus:bg-white outline-none">
+                            <option value="">Semua Kota</option>
+                            @foreach($cities as $city)
+                                <option value="{{ $city }}" {{ request('city') == $city ? 'selected' : '' }}>{{ $city }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="sm:col-span-4 flex gap-2">
                         <select name="sport"
-                                class="flex-1 px-3 py-2.5 text-sm bg-white border-2 border-stadium-gray text-pitch-black rounded-lg focus:ring-0 focus:ring-0 focus:border-electric-blue outline-none">
+                                class="flex-1 px-3 py-2.5 text-sm bg-surface-light border border-stadium-gray text-pitch-black rounded-xl focus:border-electric-blue focus:bg-white outline-none">
                             <option value="">Semua Olahraga</option>
                             @foreach($sports as $sport)
                                 <option value="{{ $sport->id }}" {{ request('sport') == $sport->id ? 'selected' : '' }}>{{ $sport->name }}</option>
                             @endforeach
                         </select>
                         <button type="submit"
-                                class="px-5 py-2.5 bg-electric-blue text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition whitespace-nowrap shadow-lg shadow-blue-500/20">
+                                class="px-5 py-2.5 bg-electric-blue text-white text-sm font-bold rounded-xl hover:bg-blue-700 active:scale-95 transition whitespace-nowrap shadow-md">
                             Cari
                         </button>
                     </div>

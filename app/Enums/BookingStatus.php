@@ -23,7 +23,7 @@ enum BookingStatus: string
 
     /**
      * Label kontekstual: booking confirmed yang sedang aktif (sudah check-in & belum habis)
-     * tampil berbeda dari confirmed biasa.
+     * tampil berbeda dari confirmed biasa, dan booking hangus jika tidak check-in.
      */
     public function labelFor(\App\Models\Booking $booking): string
     {
@@ -35,6 +35,18 @@ enum BookingStatus: string
                 return 'Check-in ✓';
             }
         }
+
+        if ($this === self::Expired) {
+            $isPaid = $booking->payment && (
+                $booking->payment->status === PaymentStatus::Paid ||
+                (is_string($booking->payment->status) && $booking->payment->status === 'paid')
+            );
+
+            if ($isPaid) {
+                return 'Tiket Hangus';
+            }
+        }
+
         return $this->label();
     }
 
@@ -56,6 +68,18 @@ enum BookingStatus: string
         if ($this === self::Confirmed && $booking->checked_in && $this->isOngoing($booking)) {
             return 'bg-green-50 text-field-green border border-green-200';
         }
+
+        if ($this === self::Expired) {
+            $isPaid = $booking->payment && (
+                $booking->payment->status === PaymentStatus::Paid ||
+                (is_string($booking->payment->status) && $booking->payment->status === 'paid')
+            );
+
+            if ($isPaid) {
+                return 'bg-red-50 text-red-700 border border-red-200';
+            }
+        }
+
         return $this->badgeClass();
     }
 
@@ -69,6 +93,22 @@ enum BookingStatus: string
             self::Expired   => 'bg-slate-500',
             self::Completed => 'bg-emerald-400',
         };
+    }
+
+    public function barClassFor(\App\Models\Booking $booking): string
+    {
+        if ($this === self::Expired) {
+            $isPaid = $booking->payment && (
+                $booking->payment->status === PaymentStatus::Paid ||
+                (is_string($booking->payment->status) && $booking->payment->status === 'paid')
+            );
+
+            if ($isPaid) {
+                return 'bg-red-500';
+            }
+        }
+
+        return $this->barClass();
     }
 
     /** Apakah booking sedang aktif dimainkan sekarang */

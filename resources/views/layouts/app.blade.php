@@ -26,9 +26,9 @@
     @endphp
 
     <header class="w-full top-0 sticky bg-white/95 backdrop-blur-md border-b border-stadium-gray/80 z-50 shadow-sm shadow-slate-100" x-data="{ mobileOpen: false }">
-        <div class="flex justify-between items-center w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto h-20">
-            <div class="flex items-center gap-8">
-                <x-logo-wordmark :href="route('dashboard')" :size="38" :badge="$userRoleBadge" class="transition-all duration-200 active:scale-95"/>
+        <div class="flex justify-between items-center w-full px-3.5 sm:px-6 lg:px-8 max-w-7xl mx-auto h-16 sm:h-20">
+            <div class="flex items-center gap-4 sm:gap-8 min-w-0">
+                <x-logo-wordmark :href="route('dashboard')" :size="32" :badge="$userRoleBadge" class="transition-all duration-200 active:scale-95"/>
                 
                 <nav class="hidden md:flex items-center gap-1.5">
                     <a href="{{ route('dashboard') }}"
@@ -183,7 +183,24 @@
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 -translate-y-2"
              x-transition:enter-end="opacity-100 translate-y-0"
-             class="md:hidden border-t border-stadium-gray bg-white px-4 py-3 space-y-1.5 shadow-lg">
+             class="md:hidden border-t border-stadium-gray bg-white px-4 py-4 space-y-2 shadow-xl max-h-[calc(100vh-4rem)] overflow-y-auto">
+            
+            {{-- User Bio Quick Card on Mobile --}}
+            <div class="p-3 bg-surface-light border border-stadium-gray rounded-2xl flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-9 h-9 rounded-full bg-electric-blue text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    </div>
+                    <div class="min-w-0 leading-tight">
+                        <p class="text-xs font-bold text-pitch-black truncate">{{ auth()->user()->name }}</p>
+                        <p class="text-[10px] text-on-surface-variant truncate">{{ auth()->user()->email }}</p>
+                    </div>
+                </div>
+                <span class="inline-block px-2 py-0.5 text-[9px] font-bold uppercase rounded-md bg-blue-50 text-electric-blue shrink-0">
+                    {{ ucfirst(auth()->user()->role) }}
+                </span>
+            </div>
+
             <a href="{{ route('dashboard') }}"
                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('dashboard') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
                 <span>Dashboard</span>
@@ -204,7 +221,7 @@
             @if(auth()->user()->isManager() || auth()->user()->isAdmin())
                 <a href="{{ route('manage.venues.index') }}"
                    class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('manage.venues.*') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
-                    <span>Venue</span>
+                    <span>Kelola Venue</span>
                 </a>
                 <a href="{{ route('manage.bookings.index') }}"
                    class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('manage.bookings.*') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
@@ -216,15 +233,31 @@
                 </a>
                 <a href="{{ route('manage.checkin.index') }}"
                    class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('manage.checkin.*') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
-                    <span>Check-in</span>
+                    <span>Scanner Check-in</span>
                 </a>
             @endif
             @if(auth()->user()->isAdmin())
                 <a href="{{ route('admin.users.index') }}"
                    class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold {{ request()->routeIs('admin.users.*') ? 'bg-blue-50 text-electric-blue' : 'text-on-surface-variant' }}">
-                    <span>Users</span>
+                    <span>Kelola Users</span>
                 </a>
             @endif
+
+            <div class="pt-3 border-t border-stadium-gray flex flex-col gap-1.5">
+                <a href="{{ route('profile.edit') }}"
+                   class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-pitch-black hover:bg-slate-50 transition">
+                    <span class="material-symbols-outlined text-[18px] text-on-surface-variant">person</span>
+                    Profil Akun Saya
+                </a>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit"
+                            class="flex items-center gap-2 w-full px-3.5 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition">
+                        <span class="material-symbols-outlined text-[18px] text-red-500">logout</span>
+                        Keluar dari Akun
+                    </button>
+                </form>
+            </div>
         </div>
     </header>
 

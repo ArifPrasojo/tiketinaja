@@ -11,7 +11,7 @@
             Tiketin<span class="text-electric-blue">Aja</span>
         </span>
         @if($badge)
-            <span class="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider {{ $dark ? 'text-slate-400' : 'text-on-surface-variant' }} mt-1">
+            <span class="hidden sm:inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider {{ $dark ? 'text-slate-400' : 'text-on-surface-variant' }} mt-1">
                 <span class="w-1.5 h-1.5 rounded-full bg-field-green"></span>
                 {{ $badge }}
             </span>

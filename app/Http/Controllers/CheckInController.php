@@ -118,7 +118,10 @@ class CheckInController extends Controller
             abort(403);
         }
 
-        $booking->load(['items.court', 'venue']);
+        // Cek dan otomatis hanguskan tiket jika masa sewa sudah lewat tanpa check-in
+        $this->bookingService->checkAndExpireIfSessionEnded($booking);
+
+        $booking->load(['items.court', 'venue', 'payment']);
 
         // Calculate check-in window info for the view
         $firstItem     = $booking->items->first();

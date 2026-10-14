@@ -118,17 +118,17 @@
                     </div>
 
                     <div x-show="!loading && slots.length > 0">
-                        <p class="text-xs text-on-surface-variant mb-3">Klik slot untuk memilih:</p>
-                        <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                        <p class="text-xs font-semibold text-on-surface-variant mb-3">Pilih slot jam yang tersedia:</p>
+                        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                             <template x-for="slot in slots" :key="slot.start_time">
                                 <button type="button" @click="toggle(slot)"
                                     :disabled="!slot.available"
                                     :class="{
-                                        'bg-white border-stadium-gray text-on-surface-variant cursor-not-allowed opacity-60': !slot.available,
-                                        'bg-blue-50 border-electric-blue/40 text-electric-blue hover:bg-blue-700/25': slot.available && !isSelected(slot),
-                                        'bg-electric-blue border-electric-blue text-white shadow-md shadow-blue-500/30': isSelected(slot),
+                                        'bg-slate-100 border-stadium-gray text-on-surface-variant/50 cursor-not-allowed opacity-60': !slot.available,
+                                        'bg-blue-50/70 border-electric-blue/30 text-electric-blue hover:bg-blue-100 active:scale-95': slot.available && !isSelected(slot),
+                                        'bg-electric-blue border-electric-blue text-white shadow-md shadow-blue-500/30 font-bold': isSelected(slot),
                                     }"
-                                    class="border rounded-xl py-2.5 text-xs font-semibold text-center transition">
+                                    class="border rounded-xl py-2.5 sm:py-3 text-xs font-semibold text-center transition">
                                     <span x-text="slot.start_time"></span>
                                 </button>
                             </template>

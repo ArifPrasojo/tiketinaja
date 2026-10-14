@@ -11,20 +11,20 @@
 
         @if(auth()->user()->role === 'admin')
 
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-8">
                 @foreach([
                     ['label'=>'Total Pengguna',  'value'=>number_format($totalUsers),  'icon'=>'group',         'iconBg'=>'bg-blue-100',   'iconColor'=>'text-electric-blue'],
                     ['label'=>'Total Venue',     'value'=>number_format($totalVenues), 'icon'=>'stadium',       'iconBg'=>'bg-green-100',  'iconColor'=>'text-field-green'],
                     ['label'=>'Total Booking',   'value'=>number_format($totalBookings),'icon'=>'receipt_long', 'iconBg'=>'bg-orange-100', 'iconColor'=>'text-athletic-orange'],
                     ['label'=>'Total Pendapatan','value'=>'Rp '.number_format($totalRevenue,0,',','.'),'icon'=>'payments','iconBg'=>'bg-purple-100','iconColor'=>'text-purple-600'],
                 ] as $stat)
-                    <div class="bg-white border border-stadium-gray rounded-2xl p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
+                    <div class="bg-white border border-stadium-gray rounded-2xl p-4 sm:p-5 flex items-center gap-3.5 sm:gap-4 hover:shadow-md transition-shadow">
                         <div class="w-12 h-12 rounded-xl {{ $stat['iconBg'] }} flex items-center justify-center shrink-0">
                             <span class="material-symbols-outlined text-[24px] {{ $stat['iconColor'] }}">{{ $stat['icon'] }}</span>
                         </div>
                         <div class="min-w-0">
                             <p class="text-xs text-on-surface-variant font-medium uppercase tracking-wide">{{ $stat['label'] }}</p>
-                            <p class="text-xl font-bold text-pitch-black truncate mt-0.5">{{ $stat['value'] }}</p>
+                            <p class="text-lg sm:text-xl font-bold text-pitch-black truncate mt-0.5">{{ $stat['value'] }}</p>
                         </div>
                     </div>
                 @endforeach
@@ -36,7 +36,7 @@
                     <span class="material-symbols-outlined text-[16px] align-text-bottom text-electric-blue mr-1">monitoring</span>
                     Status Booking
                 </h3>
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                     @php
                         $statusCfg = [
                             'pending'   => ['label'=>'Menunggu',       'icon'=>'hourglass_top',  'iconBg'=>'bg-amber-100',  'iconColor'=>'text-amber-600',  'badge'=>'bg-amber-50 text-amber-700 border border-amber-200'],
@@ -132,7 +132,7 @@
                     <span class="material-symbols-outlined text-[16px] align-text-bottom text-electric-blue mr-1">bolt</span>
                     Aksi Cepat
                 </h3>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     @foreach([
                         ['label'=>'Kelola Users',   'desc'=>'Manajemen akun pengguna',  'href'=>route('admin.users.index'),     'icon'=>'group',          'iconBg'=>'bg-blue-100',   'iconColor'=>'text-electric-blue'],
                         ['label'=>'Kelola Venue',   'desc'=>'Atur venue & lapangan',    'href'=>route('manage.venues.index'),   'icon'=>'stadium',        'iconBg'=>'bg-green-100',  'iconColor'=>'text-field-green'],
@@ -152,7 +152,7 @@
 
         @elseif(auth()->user()->role === 'manager')
 
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white border border-stadium-gray rounded-xl sporty-shadow p-5 flex items-center gap-4">
                     <div class="w-2 h-10 rounded-full bg-field-green"></div>
                     <div>

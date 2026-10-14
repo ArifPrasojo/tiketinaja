@@ -274,6 +274,28 @@ class BookingService
         return $booking;
     }
 
+    public function expireSingleBooking(Booking $booking): void
+    {
+        if ($booking->status !== BookingStatus::Pending) {
+            return;
+        }
+
+        $booking->reservedSlots()->delete();
+        $booking->update(['status' => BookingStatus::Expired]);
+        $booking->payment()->update(['status' => PaymentStatus::Expired]);
+
+        $this->logActivity(null, 'booking_expired', $booking, [
+            'booking_code' => $booking->booking_code,
+            'reason'       => 'Waktu pembayaran 15 menit telah habis',
+        ]);
+
+        try {
+            $booking->user->notify(new BookingExpired($booking));
+        } catch (\Exception $e) {
+            Log::warning('Failed to send BookingExpired notification: ' . $e->getMessage());
+        }
+    }
+
     public function expirePendingBookings(): int
     {
         $bookings = Booking::where('status', BookingStatus::Pending)
@@ -336,22 +358,79 @@ class BookingService
             ->get();
 
         foreach ($bookings as $booking) {
-            $booking->update(['status' => BookingStatus::Completed]);
-            $count++;
+            if ($booking->checked_in) {
+                // Customer sudah check-in -> Sesi Bermain Selesai (Completed)
+                $booking->update(['status' => BookingStatus::Completed]);
+                $count++;
 
-            $this->logActivity(null, 'booking_completed', $booking, [
-                'booking_code' => $booking->booking_code,
-                'checked_in'   => $booking->checked_in,
-            ]);
+                $this->logActivity(null, 'booking_completed', $booking, [
+                    'booking_code' => $booking->booking_code,
+                    'checked_in'   => true,
+                ]);
 
-            try {
-                $booking->user->notify(new \App\Notifications\SessionCompleted($booking));
-            } catch (\Exception $e) {
-                Log::warning('Failed to send SessionCompleted notification: ' . $e->getMessage());
+                try {
+                    $booking->user->notify(new \App\Notifications\SessionCompleted($booking));
+                } catch (\Exception $e) {
+                    Log::warning('Failed to send SessionCompleted notification: ' . $e->getMessage());
+                }
+            } else {
+                // Customer TIDAK check-in hingga masa sewa habis -> Tiket Hangus (Expired)
+                $booking->update(['status' => BookingStatus::Expired]);
+                $count++;
+
+                $this->logActivity(null, 'ticket_forfeited_no_checkin', $booking, [
+                    'booking_code' => $booking->booking_code,
+                    'checked_in'   => false,
+                    'reason'       => 'Customer tidak melakukan check-in selama masa aktif sewa lapangan',
+                ]);
+
+                try {
+                    $booking->user->notify(new \App\Notifications\TicketForfeited($booking));
+                } catch (\Exception $e) {
+                    Log::warning('Failed to send TicketForfeited notification: ' . $e->getMessage());
+                }
             }
         }
 
         return $count;
+    }
+
+    /**
+     * Cek apakah booking confirmed sudah melewati masa sewa tanpa check-in.
+     * Jika ya, otomatis ubah statusnya menjadi Expired (Hangus).
+     */
+    public function checkAndExpireIfSessionEnded(Booking $booking): bool
+    {
+        if ($booking->status !== BookingStatus::Confirmed || $booking->checked_in) {
+            return false;
+        }
+
+        $lastItem = $booking->items()->orderBy('booking_date')->orderByDesc('end_time')->first();
+        if (!$lastItem) {
+            return false;
+        }
+
+        $endTime = Carbon::parse($lastItem->booking_date)->setTimeFromTimeString($lastItem->end_time);
+        if (now()->gt($endTime)) {
+            $booking->update(['status' => BookingStatus::Expired]);
+            $booking->refresh();
+
+            $this->logActivity(null, 'ticket_forfeited_no_checkin', $booking, [
+                'booking_code' => $booking->booking_code,
+                'checked_in'   => false,
+                'reason'       => 'Otomatis hangus saat dibuka karena masa aktif sewa telah berakhir',
+            ]);
+
+            try {
+                $booking->user->notify(new \App\Notifications\TicketForfeited($booking));
+            } catch (\Exception $e) {
+                Log::warning('Failed to send TicketForfeited notification: ' . $e->getMessage());
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -411,8 +490,22 @@ class BookingService
         $endTime     = Carbon::parse($lastItem->booking_date)->setTimeFromTimeString($lastItem->end_time);
 
         if ($now->gt($endTime)) {
+            $booking->update(['status' => BookingStatus::Expired]);
+
+            $this->logActivity(auth()->user(), 'ticket_forfeited_no_checkin', $booking, [
+                'booking_code' => $booking->booking_code,
+                'checked_in'   => false,
+                'reason'       => 'Check-in ditolak karena masa aktif sewa lapangan sudah berakhir',
+            ]);
+
+            try {
+                $booking->user->notify(new \App\Notifications\TicketForfeited($booking));
+            } catch (\Exception $e) {
+                Log::warning('Failed to send TicketForfeited notification: ' . $e->getMessage());
+            }
+
             throw ValidationException::withMessages([
-                'booking' => 'Waktu bermain sudah selesai. Check-in tidak dapat dilakukan.',
+                'booking' => 'Tiket telah hangus karena masa aktif sewa lapangan sudah berakhir dan Anda tidak melakukan check-in.',
             ]);
         }
 

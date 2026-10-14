@@ -43,12 +43,13 @@ class MidtransService
             return null;
         }
 
-        if ($booking->payment->snap_token) {
-            return $booking->payment->snap_token;
-        }
-
+        // Jika waktu 15 menit sudah lewat, jangan izinkan Snap token
         if ($booking->expires_at && $booking->expires_at->isPast()) {
             return null;
+        }
+
+        if ($booking->payment->snap_token) {
+            return $booking->payment->snap_token;
         }
 
         $grossAmount = (int) $booking->payment->amount;

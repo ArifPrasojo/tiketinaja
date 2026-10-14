@@ -10,25 +10,25 @@
         </div>
 
         {{-- Venue Header --}}
-        <div class="bg-white border border-stadium-gray rounded-xl sporty-shadow overflow-hidden mb-6">
+        <div class="bg-white border border-stadium-gray rounded-2xl sporty-shadow overflow-hidden mb-6">
             @if($venue->image)
-                <img src="{{ asset('storage/' . $venue->image) }}" alt="{{ $venue->name }}" class="w-full h-64 object-cover">
+                <img src="{{ asset('storage/' . $venue->image) }}" alt="{{ $venue->name }}" class="w-full h-48 sm:h-64 lg:h-72 object-cover">
             @else
-                <div class="w-full h-48 bg-gradient-to-r from-blue-100 to-blue-200 flex items-center justify-center">
-                    <span class="text-pitch-black text-4xl font-bold">{{ substr($venue->name, 0, 2) }}</span>
+                <div class="w-full h-40 sm:h-52 bg-gradient-to-r from-blue-100 to-blue-200 flex items-center justify-center">
+                    <span class="text-pitch-black text-3xl sm:text-4xl font-bold">{{ substr($venue->name, 0, 2) }}</span>
                 </div>
             @endif
-            <div class="p-6">
-                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div class="p-4 sm:p-6">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div>
-                        <h1 class="text-2xl font-bold text-pitch-black">{{ $venue->name }}</h1>
-                        <p class="text-on-surface-variant mt-1 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[16px]">location_on</span>
+                        <h1 class="text-xl sm:text-2xl font-bold text-pitch-black leading-tight">{{ $venue->name }}</h1>
+                        <p class="text-on-surface-variant text-xs sm:text-sm mt-1.5 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[16px] text-electric-blue shrink-0">location_on</span>
                             {{ $venue->address }}, {{ $venue->city }}
                         </p>
                         @if($venue->phone)
-                            <p class="text-sm text-on-surface-variant mt-1 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[16px]">call</span>
+                            <p class="text-xs sm:text-sm text-on-surface-variant mt-1 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px] text-electric-blue shrink-0">call</span>
                                 {{ $venue->phone }}
                             </p>
                         @endif

@@ -208,8 +208,51 @@
                     </div>
                 @endif
 
+            @elseif($sv === 'expired')
+                @php
+                    $isPaid = $booking->payment && (
+                        $booking->payment->status === \App\Enums\PaymentStatus::Paid ||
+                        (is_string($booking->payment->status) && $booking->payment->status === 'paid')
+                    );
+                @endphp
+                <div class="bg-white border border-stadium-gray rounded-3xl sporty-shadow p-8 text-center">
+                    @if($isPaid)
+                        <div class="w-16 h-16 bg-red-50 text-red-600 border border-red-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <span class="material-symbols-outlined text-[32px]">event_busy</span>
+                        </div>
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200 mb-2">
+                            Tiket Hangus
+                        </span>
+                        <h2 class="text-xl font-extrabold text-pitch-black">Masa Sewa Telah Berakhir</h2>
+                        <p class="text-xs text-on-surface-variant leading-relaxed max-w-xs mx-auto mt-2">
+                            Tiket ini telah dinyatakan hangus karena Anda tidak melakukan check-in selama masa aktif sewa lapangan.
+                        </p>
+                    @else
+                        <div class="w-16 h-16 bg-amber-50 text-amber-600 border border-amber-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <span class="material-symbols-outlined text-[32px]">warning</span>
+                        </div>
+                        <h2 class="text-lg font-bold text-pitch-black mb-1">Booking Kedaluwarsa</h2>
+                        <p class="text-xs text-on-surface-variant leading-relaxed max-w-xs mx-auto mt-1">
+                            Booking ini telah kedaluwarsa karena pembayaran tidak diselesaikan dalam batas waktu yang ditentukan.
+                        </p>
+                    @endif
+
+                    <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-2">
+                        <a href="{{ route('bookings.show', $booking) }}"
+                           class="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold text-pitch-black bg-surface-light border border-stadium-gray rounded-xl hover:bg-slate-100 transition shadow-sm">
+                            <span class="material-symbols-outlined text-[16px]">receipt_long</span>
+                            Detail Reservasi
+                        </a>
+                        <a href="{{ route('venues.index') }}"
+                           class="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold text-white bg-electric-blue rounded-xl hover:bg-blue-700 transition shadow-sm">
+                            <span class="material-symbols-outlined text-[16px]">search</span>
+                            Cari Lapangan Lain
+                        </a>
+                    </div>
+                </div>
+
             @else
-                {{-- State: Not Confirmed Yet --}}
+                {{-- State: Not Confirmed Yet (Pending / Cancelled) --}}
                 <div class="bg-white border border-stadium-gray rounded-3xl sporty-shadow p-8 text-center">
                     <div class="w-16 h-16 bg-amber-50 text-amber-600 border border-amber-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
                         <span class="material-symbols-outlined text-[32px]">warning</span>

@@ -24,6 +24,7 @@
                         'pending'   => ['label' => 'Menunggu Bayar',  'count' => $stats['pending'],   'cls' => 'bg-amber-50 text-amber-700',    'activeBg' => 'bg-amber-500 text-white'],
                         'confirmed' => ['label' => 'Terkonfirmasi',   'count' => $stats['confirmed'], 'cls' => 'bg-emerald-50 text-emerald-700','activeBg' => 'bg-field-green text-white'],
                         'completed' => ['label' => 'Selesai Main',    'count' => $stats['completed'], 'cls' => 'bg-blue-50 text-blue-700',      'activeBg' => 'bg-blue-600 text-white'],
+                        'expired'   => ['label' => 'Kedaluwarsa / Hangus', 'count' => $stats['expired'] ?? 0, 'cls' => 'bg-red-50 text-red-700', 'activeBg' => 'bg-red-600 text-white'],
                     ];
                 @endphp
                 @foreach($tabs as $val => $tab)
@@ -75,10 +76,13 @@
                                 && $firstItem && $lastItem
                                 && $now->gte(\Carbon\Carbon::parse($firstItem->booking_date)->setTimeFromTimeString($firstItem->start_time))
                                 && $now->lt(\Carbon\Carbon::parse($lastItem->booking_date)->setTimeFromTimeString($lastItem->end_time));
+
+                            $isPaid = $booking->payment && ($booking->payment->status === \App\Enums\PaymentStatus::Paid || (is_string($booking->payment->status) && $booking->payment->status === 'paid'));
+                            $isForfeited = $sv === 'expired' && $isPaid;
                         @endphp
 
                         <div class="bg-white border rounded-2xl p-5 sm:p-6 sporty-shadow hover:shadow-md transition-all
-                                    {{ $isOngoing ? 'border-field-green ring-1 ring-field-green/20' : 'border-stadium-gray hover:border-electric-blue' }}">
+                                    {{ $isOngoing ? 'border-field-green ring-1 ring-field-green/20' : ($isForfeited ? 'border-red-300 bg-red-50/10' : 'border-stadium-gray hover:border-electric-blue') }}">
                             
                             {{-- Card Top: Code, Status, and Total --}}
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stadium-gray/70">
@@ -145,6 +149,11 @@
                                         <span class="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
                                             <span class="material-symbols-outlined text-[14px]">schedule</span>
                                             Bayar sebelum {{ $booking->expires_at->format('H:i') }}
+                                        </span>
+                                    @elseif($sv === 'expired' && $booking->payment && ($booking->payment->status === \App\Enums\PaymentStatus::Paid || (is_string($booking->payment->status) && $booking->payment->status === 'paid')))
+                                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-red-700 bg-red-50 px-2.5 py-1 rounded-lg border border-red-200">
+                                            <span class="material-symbols-outlined text-[14px]">event_busy</span>
+                                            Tiket hangus (tidak check-in)
                                         </span>
                                     @else
                                         <span class="text-xs text-on-surface-variant">Dipesan pada {{ $booking->created_at->format('d M Y H:i') }}</span>

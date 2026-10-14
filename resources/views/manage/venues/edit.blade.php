@@ -94,36 +94,38 @@
                     @csrf @method('PUT')
                     @for($day = 0; $day <= 6; $day++)
                         @php $h = $hoursMap->get($day); @endphp
-                        <div class="flex flex-wrap sm:flex-nowrap items-center gap-x-3 gap-y-2 py-2.5 border-b border-stadium-gray last:border-0">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 py-3 border-b border-stadium-gray/70 last:border-0"
+                             x-data="{ closed: {{ $h?->is_closed ? 'true' : 'false' }} }">
                             <input type="hidden" name="hours[{{ $day }}][day_of_week]" value="{{ $day }}">
 
-                            <span class="w-16 text-sm font-medium text-on-surface-variant shrink-0">{{ $dayNames[$day] }}</span>
+                            <div class="flex items-center justify-between sm:justify-start gap-4">
+                                <span class="w-20 text-sm font-bold text-pitch-black">{{ $dayNames[$day] }}</span>
 
-                            <label class="flex items-center gap-1.5 text-sm text-on-surface-variant shrink-0 cursor-pointer"
-                                   x-data="{ closed: {{ $h?->is_closed ? 'true' : 'false' }} }">
-                                <input type="checkbox" name="hours[{{ $day }}][is_closed]" value="1"
-                                       x-model="closed"
-                                       class="w-4 h-4 rounded border-stadium-gray bg-white text-electric-blue focus:ring-0">
-                                <span>Tutup</span>
+                                <label class="flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant cursor-pointer select-none">
+                                    <input type="checkbox" name="hours[{{ $day }}][is_closed]" value="1"
+                                           x-model="closed"
+                                           class="w-4 h-4 rounded border-stadium-gray bg-white text-electric-blue focus:ring-0">
+                                    <span>Tutup</span>
+                                </label>
+                            </div>
 
-                                <template x-if="!closed">
-                                    <span class="flex items-center gap-2 ml-2">
-                                        <input type="time" name="hours[{{ $day }}][open_time]"
-                                               value="{{ $h?->open_time ? substr($h->open_time, 0, 5) : '07:00' }}"
-                                               class="bg-white border border-stadium-gray text-pitch-black rounded-lg text-sm px-2 py-1.5 focus:ring-0 focus:ring-0 focus:border-electric-blue outline-none w-[110px]">
-                                        <span class="text-on-surface-variant text-xs">–</span>
-                                        <input type="time" name="hours[{{ $day }}][close_time]"
-                                               value="{{ $h?->close_time ? substr($h->close_time, 0, 5) : '22:00' }}"
-                                               class="bg-white border border-stadium-gray text-pitch-black rounded-lg text-sm px-2 py-1.5 focus:ring-0 focus:ring-0 focus:border-electric-blue outline-none w-[110px]">
-                                    </span>
-                                </template>
-                                <template x-if="closed">
-                                    <span>
-                                        <input type="hidden" name="hours[{{ $day }}][open_time]" value="{{ $h?->open_time ? substr($h->open_time, 0, 5) : '07:00' }}">
-                                        <input type="hidden" name="hours[{{ $day }}][close_time]" value="{{ $h?->close_time ? substr($h->close_time, 0, 5) : '22:00' }}">
-                                    </span>
-                                </template>
-                            </label>
+                            <div x-show="!closed" class="flex items-center gap-2">
+                                <input type="time" name="hours[{{ $day }}][open_time]"
+                                       value="{{ $h?->open_time ? substr($h->open_time, 0, 5) : '07:00' }}"
+                                       class="bg-surface-light border border-stadium-gray text-pitch-black rounded-xl text-xs sm:text-sm px-3 py-1.5 focus:border-electric-blue focus:bg-white outline-none w-32 sm:w-[120px]">
+                                <span class="text-on-surface-variant text-xs">–</span>
+                                <input type="time" name="hours[{{ $day }}][close_time]"
+                                       value="{{ $h?->close_time ? substr($h->close_time, 0, 5) : '22:00' }}"
+                                       class="bg-surface-light border border-stadium-gray text-pitch-black rounded-xl text-xs sm:text-sm px-3 py-1.5 focus:border-electric-blue focus:bg-white outline-none w-32 sm:w-[120px]">
+                            </div>
+
+                            <div x-show="closed" x-cloak>
+                                <span class="text-xs font-semibold text-red-500 bg-red-50 px-2.5 py-1 rounded-lg border border-red-200">
+                                    Libur / Tutup Operasional
+                                </span>
+                                <input type="hidden" name="hours[{{ $day }}][open_time]" value="{{ $h?->open_time ? substr($h->open_time, 0, 5) : '07:00' }}">
+                                <input type="hidden" name="hours[{{ $day }}][close_time]" value="{{ $h?->close_time ? substr($h->close_time, 0, 5) : '22:00' }}">
+                            </div>
                         </div>
                     @endfor
                     <div class="flex justify-end pt-3">

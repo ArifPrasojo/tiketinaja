@@ -34,6 +34,7 @@
                             {{ match($data['type'] ?? '') {
                                 'booking_confirmed' => 'bg-green-50 text-field-green border border-green-200',
                                 'booking_cancelled' => 'bg-red-50 text-red-500 border border-red-200',
+                                'ticket_forfeited'  => 'bg-red-50 text-red-500 border border-red-200',
                                 'booking_expired'   => 'bg-amber-50 text-amber-600 border border-amber-200',
                                 'checkin_success', 'checkin_playtime' => 'bg-blue-50 text-electric-blue border border-blue-200',
                                 'session_completed' => 'bg-orange-50 text-athletic-orange border border-orange-200',
@@ -43,6 +44,7 @@
                                 $icon = match($data['type'] ?? '') {
                                     'booking_confirmed'  => 'check_circle',
                                     'booking_cancelled'  => 'cancel',
+                                    'ticket_forfeited'   => 'event_busy',
                                     'booking_expired'    => 'alarm',
                                     'checkin_success'    => 'verified',
                                     'checkin_playtime'   => 'sprint',
