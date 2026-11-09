@@ -76,6 +76,91 @@ class CheckInController extends Controller
     }
 
     /**
+     * Customer view ticket & QR check-in data.
+     *
+     * GET /api/bookings/{booking}/ticket
+     */
+    public function ticket(Request $request, Booking $booking)
+    {
+        if ($booking->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Tidak diizinkan.'], 403);
+        }
+
+        // Auto-check and expire if session ended without check-in
+        $this->bookingService->checkAndExpireIfSessionEnded($booking);
+        $booking->refresh();
+
+        $booking->load(['items.court.sport', 'venue', 'payment']);
+
+        $firstItem = $booking->items->first();
+        $lastItem  = $booking->items->last();
+        $now       = now();
+
+        $isPaid = $booking->payment && (
+            $booking->payment->status === \App\Enums\PaymentStatus::Paid ||
+            (is_string($booking->payment->status) && $booking->payment->status === 'paid')
+        );
+
+        if ($booking->status === \App\Enums\BookingStatus::Expired) {
+            return response()->json([
+                'success'      => false,
+                'status'       => 'expired',
+                'is_forfeited' => $isPaid,
+                'message'      => $isPaid
+                    ? 'Tiket hangus karena Anda tidak melakukan check-in selama masa sewa lapangan.'
+                    : 'Booking kedaluwarsa karena pembayaran tidak diselesaikan dalam 15 menit.',
+                'booking'      => $booking,
+            ]);
+        }
+
+        if ($booking->status === \App\Enums\BookingStatus::Pending) {
+            return response()->json([
+                'success' => false,
+                'status'  => 'pending',
+                'message' => 'Tiket QR belum tersedia. Selesaikan pembayaran terlebih dahulu.',
+                'booking' => $booking,
+            ]);
+        }
+
+        if ($booking->status === \App\Enums\BookingStatus::Cancelled) {
+            return response()->json([
+                'success' => false,
+                'status'  => 'cancelled',
+                'message' => 'Booking telah dibatalkan.',
+                'booking' => $booking,
+            ]);
+        }
+
+        // Booking is Confirmed or Completed
+        $checkInInfo = null;
+        if ($firstItem) {
+            $playTime       = Carbon::parse($firstItem->booking_date)->setTimeFromTimeString($firstItem->start_time);
+            $checkInOpensAt = $playTime->copy()->subMinutes(10);
+            $endTime        = Carbon::parse($lastItem->booking_date)->setTimeFromTimeString($lastItem->end_time);
+
+            $checkInInfo = [
+                'opens_at'           => $checkInOpensAt->toISOString(),
+                'play_time'          => $playTime->toISOString(),
+                'end_time'           => $endTime->toISOString(),
+                'is_open'            => $now->gte($checkInOpensAt),
+                'is_play_time'       => $now->gte($playTime),
+                'seconds_until_open' => max(0, $now->diffInSeconds($checkInOpensAt, false)),
+            ];
+        }
+
+        return response()->json([
+            'success'       => true,
+            'status'        => $booking->status->value,
+            'qr_token'      => $booking->qr_code,
+            'qr_verify_url' => route('manage.checkin.index', ['token' => $booking->qr_code]),
+            'is_checked_in' => (bool) $booking->checked_in,
+            'checked_in_at' => $booking->checked_in_at?->toISOString(),
+            'checkin_window'=> $checkInInfo,
+            'booking'       => $booking,
+        ]);
+    }
+
+    /**
      * Customer self check-in via mobile.
      *
      * POST /api/bookings/{booking}/checkin

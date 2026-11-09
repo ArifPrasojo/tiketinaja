@@ -22,6 +22,10 @@ class Court extends Model
         'price_per_hour' => 'integer',
     ];
 
+    protected $appends = [
+        'image_url',
+    ];
+
     public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class);
@@ -40,5 +44,10 @@ class Court extends Model
     public function reservedSlots(): HasMany
     {
         return $this->hasMany(ReservedSlot::class);
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image ? asset('storage/' . $this->image) : null;
     }
 }

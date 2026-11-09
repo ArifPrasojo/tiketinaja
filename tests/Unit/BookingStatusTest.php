@@ -47,11 +47,11 @@ class BookingStatusTest extends TestCase
 
     public function test_badge_class_returns_correct_tailwind_classes(): void
     {
-        $this->assertStringContainsString('yellow', BookingStatus::Pending->badgeClass());
-        $this->assertStringContainsString('blue',   BookingStatus::Confirmed->badgeClass());
-        $this->assertStringContainsString('red',    BookingStatus::Cancelled->badgeClass());
-        $this->assertStringContainsString('gray',   BookingStatus::Expired->badgeClass());
-        $this->assertStringContainsString('green',  BookingStatus::Completed->badgeClass());
+        $this->assertStringContainsString('amber', BookingStatus::Pending->badgeClass());
+        $this->assertStringContainsString('blue',  BookingStatus::Confirmed->badgeClass());
+        $this->assertStringContainsString('red',   BookingStatus::Cancelled->badgeClass());
+        $this->assertStringContainsString('slate', BookingStatus::Expired->badgeClass());
+        $this->assertStringContainsString('green', BookingStatus::Completed->badgeClass());
     }
 
     public function test_bar_class_returns_string(): void

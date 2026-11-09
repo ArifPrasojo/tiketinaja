@@ -20,6 +20,10 @@ class Venue extends Model
         'is_active' => 'boolean',
     ];
 
+    protected $appends = [
+        'image_url',
+    ];
+
     public function manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'manager_id');
@@ -54,5 +58,10 @@ class Venue extends Model
     {
         $avg = $this->reviews()->avg('rating');
         return $avg ? round($avg, 1) : null;
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image ? asset('storage/' . $this->image) : null;
     }
 }

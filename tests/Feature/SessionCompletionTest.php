@@ -113,7 +113,7 @@ class SessionCompletionTest extends TestCase
         Carbon::setTestNow();
     }
 
-    public function test_confirmed_without_checkin_is_completed_after_end_time(): void
+    public function test_confirmed_without_checkin_is_expired_after_end_time(): void
     {
         $date    = now()->addDay()->toDateString();
         $booking = $this->service->createBooking($this->customer, $this->court, $date, ['11:00']);
@@ -125,7 +125,7 @@ class SessionCompletionTest extends TestCase
         $count = $this->service->completeFinishedBookings();
 
         $this->assertEquals(1, $count);
-        $this->assertEquals(BookingStatus::Completed, $booking->fresh()->status);
+        $this->assertEquals(BookingStatus::Expired, $booking->fresh()->status);
 
         Carbon::setTestNow();
     }

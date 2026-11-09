@@ -179,4 +179,94 @@ class ApiTest extends TestCase
         // Verify token was deleted from database
         $this->assertDatabaseCount('personal_access_tokens', 0);
     }
+
+    public function test_api_customer_can_update_password(): void
+    {
+        $token = $this->customer->createToken('test')->plainTextToken;
+
+        $response = $this->withToken($token)->putJson('/api/auth/password', [
+            'current_password'      => 'password',
+            'password'              => 'new-password-123',
+            'password_confirmation' => 'new-password-123',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true);
+    }
+
+    public function test_api_customer_can_delete_account(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test')->plainTextToken;
+
+        $response = $this->withToken($token)->deleteJson('/api/auth/me', [
+            'password' => 'password',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true);
+
+        $this->assertDatabaseMissing('users', ['id' => $user->id]);
+    }
+
+    public function test_api_customer_dashboard_returns_metrics_and_home_data(): void
+    {
+        $token = $this->customer->createToken('test')->plainTextToken;
+
+        $response = $this->withToken($token)->getJson('/api/customer/dashboard');
+
+        $response->assertOk()
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'user' => ['id', 'name', 'email'],
+                    'stats' => ['upcoming_count', 'total_bookings', 'total_spent'],
+                    'upcoming_bookings',
+                    'recent_bookings',
+                ],
+            ]);
+    }
+
+    public function test_api_venue_includes_image_url_accessor(): void
+    {
+        $response = $this->getJson("/api/venues/{$this->venue->id}");
+
+        $response->assertOk()
+            ->assertJsonStructure(['id', 'name', 'image_url']);
+    }
+
+    public function test_api_promos_list_is_accessible_to_authenticated_customer(): void
+    {
+        $token = $this->customer->createToken('test')->plainTextToken;
+
+        $response = $this->withToken($token)->getJson('/api/promos');
+
+        $response->assertOk()
+            ->assertJsonStructure(['success', 'data']);
+    }
+
+    public function test_api_booking_ticket_endpoint_returns_ticket_data(): void
+    {
+        $token = $this->customer->createToken('test')->plainTextToken;
+
+        // Create booking
+        $createRes = $this->withToken($token)->postJson('/api/bookings', [
+            'court_id'   => $this->court->id,
+            'date'       => now()->addDay()->toDateString(),
+            'time_slots' => ['11:00'],
+        ]);
+
+        $bookingId = $createRes->json('booking.id');
+
+        // Confirm booking (pay)
+        $this->withToken($token)->postJson("/api/bookings/{$bookingId}/pay");
+
+        // Get ticket
+        $ticketRes = $this->withToken($token)->getJson("/api/bookings/{$bookingId}/ticket");
+
+        $ticketRes->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('status', 'confirmed')
+            ->assertJsonStructure(['qr_token', 'qr_verify_url', 'is_checked_in', 'checkin_window']);
+    }
 }

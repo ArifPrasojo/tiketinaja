@@ -9,9 +9,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            SportSeeder::class,
-            DemoSeeder::class,
-            PromoSeeder::class,   // ensures platform-wide promos exist
+            SingleVenueSeeder::class,
         ]);
     }
 }
